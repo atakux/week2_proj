@@ -1,29 +1,5 @@
 # week 2
 
-'''
-lets make a plan and decide what idea we are going to use ?
-
-I am fine with both
-
-sounds good
-
-
-which of our ideas from google docs sounds the most fun/interesting ?
-
-The recipe, the activity and the youtube looks fun
-
-
-sounds good
-
-hmmm,,, i kinda like the activity one a lot bc its kinda unique
-I like it too, we can go for it
-
-
-i sent a link for a potential api we could use on slack
-
-'''
-# an example maybe: ?
-
 import requests
 # import sqlalchemy as db
 # import pandas as pd
