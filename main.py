@@ -3,9 +3,7 @@
 import requests
 import sqlalchemy as db
 import pandas as pd
-from pandas import DataFrame
-from pprint import pprint
-import json
+from requests.structures import CaseInsensitiveDict
 
 
 def miles_to_metres(miles):
@@ -40,24 +38,27 @@ def weather_api(city):
 
 def places_api(city, rad):
     radius = miles_to_metres(rad)
+    how_many = int(input("how many places would you like listed? "))
+    category = input("what type of places would you like listed? ")
 
     lon_lat = weather_api(city)
 
     longitude = lon_lat[0]
     latitude = lon_lat[1]
 
-    # get places api info using the long and lat from weather api
-    places_url = "https://nearby-places.p.rapidapi.com/v2/nearby"
-    # we will change lng and lat to the lng and lat of the cityName according to the
-    # data from the weather api. this is j example for now
-    places_query = {"lat": latitude, "lng": longitude, "radius": radius}
-    places_headers = {
-        'X-RapidAPI-Key': 'a4fc26898bmshc7d033522da7a84p1abdf4jsna4cd14aded3d',
-        "X-RapidAPI-Host": "nearby-places.p.rapidapi.com"
-    }
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
 
-    places_response = requests.get(places_url, headers=places_headers,
-                                   params=places_query)
+    # get places api info using the long and lat from weather api
+    main_url = "https://api.geoapify.com/v2/places?"
+    category_url = "categories="+category
+    coord_url = "&filter=circle:"+str(longitude)+","+str(latitude)+","+str(radius)
+    limit_url = "&limit="+str(how_many)
+    api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
+
+    places_url = main_url + category_url + coord_url + limit_url + api_key
+
+    places_response = requests.get(places_url, headers=headers)
 
     return places_response
 
@@ -71,13 +72,14 @@ def db_print():
 
     # Storing in database
     engine = db.create_engine('sqlite:///activity_db.db')
-    places = places_response.json()['results']
+    places = places_response.json()
+
     print('Place Name \t\t Phone # \t\t Address')
     print('---------- \t\t ------- \t\t -------')
     for place in places:
         print(f'{place["name"]} \t\t {place["phone"]} \t {place["address"]}')
         place_dict = {'address': place['address'], 'name': place['name'], 'phone': place['phone']}
-        df = pd.DataFrame.from_dict([place_dict])
+        df = pd.DataFrame.from_dict(place_dict)
         df.to_sql('Activity', con=engine, if_exists='append', index=False)
     # result = engine.execute('SELECT * FROM Activity;').fetchall()
     # print(pd.DataFrame(result))
