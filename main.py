@@ -72,14 +72,24 @@ def db_print():
 
     # Storing in database
     engine = db.create_engine('sqlite:///activity_db.db')
-    places = places_response.json(
+    places = places_response.json()["features"]
         
-    print('Place Name \t\t Phone # \t\t Address')
-    print('---------- \t\t ------- \t\t -------')
+    print('Place Name \t\t\t\t\t Address')
+    print('---------- \t\t\t\t\t -------')
     for place in places:
-        print(f'{place["name"]} \t\t {place["phone"]} \t {place["address"]}')
-        place_dict = {'address': place['address'], 'name': place['name'], 'phone': place['phone']}
-        df = pd.DataFrame.from_dict(place_dict)
+        detail = place["properties"]
+        try:
+            name = detail["name"]
+            address = detail["address_line1"] + " " + detail["address_line2"]
+        
+        except:
+            name = detail["street"]
+            address = detail["address_line1"] + " " + detail["address_line2"]
+
+        
+        print(f'{name} \t\t\t\t\t {address} ')
+        place_dict = {'address': address, 'name': name}
+        df = pd.DataFrame.from_dict([place_dict])
         df.to_sql('Activity', con=engine, if_exists='append', index=False)
     # result = engine.execute('SELECT * FROM Activity;').fetchall()
     # print(pd.DataFrame(result))
