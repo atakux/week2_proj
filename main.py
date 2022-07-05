@@ -1,10 +1,12 @@
 # week 2
 
 import requests
-# import sqlalchemy as db
-# import pandas as pd
-# from pandas import DataFrame
+import sqlalchemy as db
+import pandas as pd
+from pandas import DataFrame
 from pprint import pprint
+import json
+
 
 # receive user input for the city they would like weather for
 cityName = input("input a city to get weather: ").capitalize()
@@ -41,7 +43,8 @@ places_url = "https://nearby-places.p.rapidapi.com/v2/nearby"
 # data from the weather api. this is j example for now
 places_query = {"lat": latitude, "lng": longitude, "radius": radius}
 places_headers = {
- "X-RapidAPI-Key": "dfa2158044msh6359d946b81ab6ap188d9ejsn419a4d091251",
+ #"X-RapidAPI-Key": "dfa2158044msh6359d946b81ab6ap188d9ejsn419a4d091251",
+ 'X-RapidAPI-Key': 'a4fc26898bmshc7d033522da7a84p1abdf4jsna4cd14aded3d',
  "X-RapidAPI-Host": "nearby-places.p.rapidapi.com"
 }
 
@@ -49,9 +52,8 @@ places_response = requests.get(places_url, headers=places_headers,
                                params=places_query)
 
 
-pprint(weather_response.json())
+#pprint(weather_response.json())
 pprint(places_response.json())
-
 '''
 we should also put it in a database and or smth
 
@@ -61,3 +63,14 @@ for key, val in response.json().items():
   pprint(f"{key} : {val} ")
 
 '''
+
+#Storing in database
+engine = db.create_engine('sqlite:///activity_db.db')
+places = places_response.json()['results']
+for place in places:
+  print(f'{place["name"]} \t {place["phone"]}\t {place["address"]}')
+  place_dict = {'address' : place['address'], 'name': place['name'],'phone' : place['phone']}
+  df = pd.DataFrame.from_dict([place_dict])
+  df.to_sql('Activity', con=engine, if_exists='append', index=False)
+#result = engine.execute('SELECT * FROM Activity;').fetchall()
+#print(pd.DataFrame(result))
