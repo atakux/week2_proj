@@ -72,5 +72,6 @@ for place in places:
   place_dict = {'address' : place['address'], 'name': place['name'],'phone' : place['phone']}
   df = pd.DataFrame.from_dict([place_dict])
   df.to_sql('Activity', con=engine, if_exists='append', index=False)
+#test
 #result = engine.execute('SELECT * FROM Activity;').fetchall()
 #print(pd.DataFrame(result))
