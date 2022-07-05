@@ -6,5 +6,5 @@ PLACE FINDER is a program that suggest places based on the user's location and t
 * json
 * requests
 * [OpenWeatherMap Api](https://rapidapi.com/community/api/open-weather-map/)
-* [GeoApify Place API](https://apidocs.geoapify.com/docs/places/#about)
+* [GeoApify Place API](https://www.weatherapi.com/docs/)
 
