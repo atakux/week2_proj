@@ -48,8 +48,13 @@ def get_weather(city):
                 else:
                     continue
 
-    return f"The temperature in {city} is {temp} degrees F and is {sky}. The wind speeds are at {winds} mph and it " \
-           f"feels like {feels_temp} degrees. "
+    return {"temp" : temp,"sky" : sky, "winds": winds, "feels_temp": feels_temp}
+    #return f"The temperature in {city} is {temp} degrees F and is {sky}. The wind speeds are at {winds} mph and it " \
+    #       f"feels like {feels_temp} degrees. "
+
+def print_weather(city, weather):
+    print(f"The temperature in {city} is {weather['temp']} degrees F and is {weather['sky']}. The wind speeds are at {weather['winds']} mph and it " \
+           f"feels like {weather['feels_temp']} degrees. ")
 
 
 def coordinates(city):
@@ -94,18 +99,33 @@ def categories():
         else:
             return option
 
+def filter_categories(weather):
+    categories = ''
+    print("Based on weather we suggest you the folowing: ")
+    if(int(weather["temp"]) > 75 and weather["sky"].lower() == "sunny"):
+        categories = "commercial.outdoor_and_sport,sport.swimming_pool,beach,catering.ice_cream,entertainment.miniature_golf,leisure.park"
+    elif (int(weather["temp"]) > 75 and weather["sky"].lower != "sunny"):
+        categories = "commercial.outdoor_and_sport,leisure.spa"
+    elif (int(weather["temp"]) < 50):
+        categories = "commercial.shopping_mall,commercial.toy_and_game"
+    else:
+        categories = "commercial.shopping_mall"
 
-def places_api(city, rad):
+    return categories
+    
+
+
+def places_api(rad,lon_lat,how_many,category):
     radius = miles_to_metres(rad)
-    how_many = int(input("how many places would you like listed? "))
+    #how_many = int(input("how many places would you like listed? "))
     #Set a maximum number of places
-    if(how_many > 20):
-        print("The number of researches is limited to 20 researches.")
-        how_many = 20
+    #if(how_many > 20):
+    #    print("The number of researches is limited to 20 researches.")
+    #    how_many = 20
 
-    category = categories()
+    #category = categories()
 
-    lon_lat = coordinates(city)
+    #lon_lat = coordinates(city)
 
     longitude = lon_lat[1]
     latitude = lon_lat[0]
@@ -127,15 +147,7 @@ def places_api(city, rad):
     return places_response
 
 
-def db_print():
-    # receive user input for the city they would like weather for
-    city_name = input("input a city to get weather: ").capitalize()
-    miles_radius = int(input("how many miles radius? "))
-
-    places_response = places_api(city_name, miles_radius)
-
-    current_weather = get_weather(city_name)
-    print(f"The weather in {city_name}: \n\t{current_weather}")
+def db_print(places_response):
 
     # Storing in database
     engine = db.create_engine('sqlite:///activity_db.db')
@@ -161,5 +173,25 @@ def db_print():
     # result = engine.execute('SELECT * FROM Activity;').fetchall()
     # print(pd.DataFrame(result))
 
+def main():
+    # receive user input for the city they would like weather for
+    city_name = input("input a city to get weather: ").capitalize()
+    miles_radius = int(input("how many miles radius? "))
+    #Set a maximum number of places
+    how_many = int(input("how many places would you like listed? "))
+    if(how_many > 20):
+        print("The number of researches is limited to 20 researches.")
+        how_many = 20
+    current_weather = get_weather(city_name)
+    #print(f"The weather in {city_name}: \n\t{current_weather}")
+    lon_lat = coordinates(city_name)
+    category = categories()
+    places_response = places_api(miles_radius,lon_lat,how_many,category)
+    print_weather(city_name,current_weather)
+    print("\n\n")
+    db_print(places_response)
+    places_response = places_api(miles_radius,lon_lat,how_many,filter_categories(current_weather))
+    db_print(places_response)
 
-db_print()
+
+main()
