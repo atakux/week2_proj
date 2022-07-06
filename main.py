@@ -24,8 +24,23 @@ def weather_api(city):
     return weather_response
 
 
-def get_location_name():
+def get_location_ip():
     weather_response = weather_api('auto:ip')
+
+    the_city = ''
+
+    for key, val in weather_response.json().items():
+        if key == 'location':
+            for k, v in val.items():
+                if k != 'name':
+                    continue
+                else:
+                    the_city = v
+    return the_city
+
+
+def get_location_zip(zip_code):
+    weather_response = weather_api(zip_code)
 
     the_city = ''
 
@@ -43,7 +58,7 @@ def get_weather(city):
     weather_response = weather_api(city)
 
     if city == 'auto:ip':
-        city = get_location_name()
+        city = get_location_ip()
 
     temp = ''
     sky = ''
@@ -124,8 +139,11 @@ def places_api(city, rad):
     how_many = int(input("how many places would you like listed? "))
     # set a maximum number of places
     if how_many > 20:
-        print("note: the number of places is limited to 20.")
+        print("the number of places is limited to 20. \ndefaulting to 20 places.")
         how_many = 20
+    elif how_many < 1:
+        print("the number of places must be at least 1. \ndefaulting to 1 place")
+        how_many = 1
 
     category = categories()
 
@@ -153,22 +171,29 @@ def places_api(city, rad):
 
 def db_print():
     # receive user input for the city they would like weather for
-    city_name = input("input a city to get weather, [leave blank if you want your IP to be inputted for you]: ")
+    city_name = input("input a city or zipcode to get weather, [leave blank if you want your IP to be inputted "
+                      "for you]: ")
     if city_name == '':
-        print(f"...retrieving your IP... location = {get_location_name()}")
+        print(f"...retrieving your IP... location = {get_location_ip()}")
         city_name = 'auto:ip'
+    elif city_name.isdigit():
+        print(f"your location at the zipcode {city_name} is {get_location_zip(city_name)}")
 
     miles_radius = int(input("how many miles radius? "))
 
     if miles_radius > 30:
-        miles_radius = int(input("\nmax radius is 30 miles. \nplease input something lower."))
-    elif miles_radius < 0:
-        miles_radius = int(input("\ncant have negative radius. \nplease input something higher."))
+        print("\nmax radius is 30 miles. \ndefaulting to 30 miles.")
+        miles_radius = 30
+    elif miles_radius < 1:
+        print("\nmin radius is 1 mile. \ndefaulting to 1 mile.")
+        miles_radius = 1
 
     try:
         places_response = places_api(city_name, miles_radius)
         if city_name == 'auto:ip':
-            city_name = get_location_name()
+            city_name = get_location_ip()
+        elif city_name.isdigit():
+            city_name = get_location_zip(city_name)
 
         current_weather = get_weather(city_name)
         print(f"The weather in {city_name}: \n\t{current_weather}")
