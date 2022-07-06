@@ -21,9 +21,9 @@ def weather_api(city):
         'key': '0afe61da1abe4a7691b205109220507'
     }
 
-    weather_response = requests.get(weather_url, headers=weather_headers,
-                                    params=weather_query)
-    return weather_response
+    weather_resp = requests.get(weather_url, headers=weather_headers,
+                                params=weather_query)
+    return weather_resp
 
 
 def get_location_ip():
@@ -98,6 +98,7 @@ def get_weather(city):
                 else:
                     continue
 
+    # list of weather data
     weather_data = [temp, sky, feels_temp, winds]
 
     return weather_data
@@ -151,8 +152,6 @@ def categories():
 
 def filter_categories(weather):
 
-    f_categories = []
-
     # temp = 0, sky = 1
     if int(weather[0]) > 75 and weather[1].lower() == "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach', 'catering.ice_cream',
@@ -164,7 +163,7 @@ def filter_categories(weather):
     else:
         f_categories = ['commercial.shopping_mall']
 
-    print(f"Based on your weather we suggest you the following categories: {''.join(f_categories)}")
+    return f_categories
 
 
 def places_api(city, rad):
@@ -203,15 +202,55 @@ def places_api(city, rad):
 
     places_url = main_url + category_url + coord_url + limit_url + api_key
 
-    places_response = requests.get(places_url, headers=headers)
+    places_resp = requests.get(places_url, headers=headers)
 
-    return places_response
+    return places_resp
 
 
-def db_print():
-    """prompt user for starter info. call other functions to retrieve information. add information into database.
-       print information for the user
-    """
+def add_to_db(place_response):
+    """add data to database"""
+    # storing in database
+    engine = db.create_engine('sqlite:///activity_db.db')
+    places = places_response.json()["features"]
+
+    for place in places:
+        detail = place["properties"]
+        try:
+            name = detail["name"]
+            address = detail["address_line1"] + " " + detail["address_line2"]
+        except:
+            name = detail["street"]
+            address = detail["address_line1"] + " " + detail["address_line2"]
+
+        place_dict = {'address': address, 'name': name}
+        df = pd.DataFrame.from_dict([place_dict])
+        df.to_sql('Activity', con=engine, if_exists='append', index=False)
+
+        # result = engine.execute('SELECT * FROM Activity;').fetchall()
+        # print(pd.DataFrame(result))
+
+
+def print_info():
+    """print all the info in a formatted manner"""
+    # printing
+    print('Place Name \t\t\t\t\t Address')
+    print('---------- \t\t\t\t\t -------')
+
+    places = places_response.json()["features"]
+
+    for place in places:
+        detail = place["properties"]
+        try:
+            name = detail["name"]
+            address = detail["address_line1"] + " " + detail["address_line2"]
+        except:
+            name = detail["street"]
+            address = detail["address_line1"] + " " + detail["address_line2"]
+
+        print(f'{name} \t\t\t\t\t {address} ')
+
+
+if __name__ == "__main__":
     # receive user input for the city they would like weather for
     city_name = input("input a city or zipcode to get weather, [leave blank if you want your IP to be inputted "
                       "for you]: ")
@@ -237,6 +276,7 @@ def db_print():
     try:
         # call places_api to get places
         places_response = places_api(city_name, miles_radius)
+        add_to_db(places_response)
 
         # check if the city_name was a zip code or blank, rather than a city name
         if city_name == 'auto:ip':
@@ -246,37 +286,15 @@ def db_print():
 
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
-        print(f"The weather in {city_name}: \n\t{current_weather}")
+        print(f"The weather in {city_name}: \n\tThe temperature in {city_name} is {current_weather[0]} degrees F and "
+              f"the condition is {current_weather[1].lower()}. \n\tThe wind speeds are at {current_weather[3]} mph "
+              f"and it feels like {current_weather[2]} degrees. ")
 
-        # storing in database
-        engine = db.create_engine('sqlite:///activity_db.db')
-        places = places_response.json()["features"]
+        print_info()
 
-        # printing
-        print('Place Name \t\t\t\t\t Address')
-        print('---------- \t\t\t\t\t -------')
-        for place in places:
-            detail = place["properties"]
-            try:
-                name = detail["name"]
-                address = detail["address_line1"] + " " + detail["address_line2"]
-            except:
-                name = detail["street"]
-                address = detail["address_line1"] + " " + detail["address_line2"]
+        suggested_list = filter_categories(get_weather(city_name))
 
-            print(f'{name} \t\t\t\t\t {address} ')
-            place_dict = {'address': address, 'name': name}
-            df = pd.DataFrame.from_dict([place_dict])
-            df.to_sql('Activity', con=engine, if_exists='append', index=False)
-
-            # result = engine.execute('SELECT * FROM Activity;').fetchall()
-            # print(pd.DataFrame(result))
-
-        filter_categories(get_weather(city_name))
-
-    # if user inputted invalid city_name display error message
+        print(f"\nBased on your weather we suggest you the following categories: "
+              f"{', '.join(filter_categories(get_weather(city_name)))}")
     except:
         print("\nan error occurred.\nplease run the program again and be sure your input is correct.")
-
-
-db_print()
