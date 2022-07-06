@@ -184,6 +184,24 @@ def places_api(city, rad):
     # prompt the user to choose a category
     category = categories()
 
+    print("When prompted for accommodation, enter w if you are looking for places suitable for person in weelchair,\
+    enter d for places that accept dogs, wd for both condition, and nothing for no conditions")
+    condition = ""
+    while True:
+        condition = input("Accommodation: ")
+        if(condition == "w" or condition == "d" or condition == "wd" or condition == ""):
+            break
+        else:
+            print("Input is incorrect. Enter w if you are looking for places suitable for person in weelchair,\
+            enter d for places that accept dogs, wd for both condition, and nothing for no conditions")
+
+    if(condition == "w"):
+        condition = "wheelchair"
+    elif(condition == "d"):
+        condition = "dogs"
+    elif(condition == "wd"):
+        condition = "wheelchair,dogs"
+
     # retrieve user coordinates
     lon_lat = coordinates(city)
 
@@ -200,8 +218,13 @@ def places_api(city, rad):
     coord_url = "&filter=circle:"+str(longitude)+","+str(latitude)+","+str(radius)
     limit_url = "&limit="+str(how_many)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
+    condition_url = "&conditions="+condition
+    
+    if(condition == ""):
+        places_url = main_url + category_url + coord_url + limit_url + api_key
+    else:
+        places_url = main_url + category_url + condition_url + coord_url + limit_url + api_key
 
-    places_url = main_url + category_url + coord_url + limit_url + api_key
 
     places_response = requests.get(places_url, headers=headers)
 
