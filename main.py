@@ -75,7 +75,7 @@ def coordinates(city):
 
 def categories():
     category_list = ['accommodation', 'activity', 'beach', 'commercial', 'catering', 'entertainment', 'leisure']
-    option = input("if you would like to see a list of categories input m,\n\totherwise input a category: ")
+    option = input("if you would like to see a list of categories\ninput m, otherwise input a category: ").lower()
 
     if type(option) != str:
         print("invalid input")
