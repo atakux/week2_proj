@@ -73,10 +73,32 @@ def coordinates(city):
     return long_lat
 
 
+def categories():
+    category_list = ['accommodation', 'activity', 'beach', 'commercial', 'catering', 'entertainment', 'leisure']
+    option = input("if you would like to see a list of categories\ninput m, otherwise input a category: ").lower()
+
+    if type(option) != str:
+        print("invalid input")
+    elif option == 'm':
+        print("here is a list of categories to choose from: ")
+        for i in category_list:
+            print(i, end='\n')
+        choice = input("input your category: ")
+        if choice not in category_list:
+            print("invalid category")
+        else:
+            return choice
+    else:
+        if option not in category_list and option != 'm':
+            print("invalid category")
+        else:
+            return option
+
+
 def places_api(city, rad):
     radius = miles_to_metres(rad)
     how_many = int(input("how many places would you like listed? "))
-    category = input("what type of places would you like listed? ")
+    category = categories()
 
     lon_lat = coordinates(city)
 
