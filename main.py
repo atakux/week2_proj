@@ -98,6 +98,11 @@ def categories():
 def places_api(city, rad):
     radius = miles_to_metres(rad)
     how_many = int(input("how many places would you like listed? "))
+    #Set a maximum number of places
+    if(how_many > 20):
+        print("The number of researches is limited to 20 researches.")
+        how_many = 20
+
     category = categories()
 
     lon_lat = coordinates(city)
