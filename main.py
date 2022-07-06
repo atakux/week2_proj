@@ -4,47 +4,123 @@ import requests
 import sqlalchemy as db
 import pandas as pd
 from requests.structures import CaseInsensitiveDict
+from pprint import pprint
 
 
 def miles_to_metres(miles):
+    """converts miles to metres"""
     return miles*1609.344
 
 
 def weather_api(city):
+    """accesses the weather api and returns the response code & data"""
     # get weather api info using the cityName
-    weather_url = 'https://community-open-weather-map.p.rapidapi.com/climate/month'
+    weather_url = 'https://api.weatherapi.com/v1/current.json'
     weather_query = {"q": city}
     weather_headers = {
-        'X-RapidAPI-Key': 'dfa2158044msh6359d946b81ab6ap188d9ejsn419a4d091251',
-        'X-RapidAPI-Host': 'community-open-weather-map.p.rapidapi.com'
+        'key': '0afe61da1abe4a7691b205109220507'
     }
 
+    # access the weather api and store the response/data
     weather_response = requests.get(weather_url, headers=weather_headers,
                                     params=weather_query)
+    return weather_response
+
+
+def get_weather(city):
+    """gets the weather for the user inputted city"""
+    weather_response = weather_api(city)
+
+    temp = ''
+    sky = ''
+    feels_temp = ''
+    winds = ''
+
+    # parse through all the data to grab the information to return to the user
+    for key, val in weather_response.json().items():
+        # grabbing current weather information
+        if key == 'current':
+            for k, v in val.items():
+                # save the temp
+                if k == 'temp_f':
+                    temp = v
+                elif k == 'condition':
+                    for kk, vv in v.items():
+                        # save how the weather is
+                        if kk == 'text':
+                            sky = vv
+                # save the wind
+                elif k == 'wind_mph':
+                    winds = v
+                # save how the temp feels like
+                elif k == 'feelslike_f':
+                    feels_temp = v
+                else:
+                    continue
+
+    return f"The temperature in {city} is {temp} degrees F and is {sky}. The wind speeds are at {winds} mph and it " \
+           f"feels like {feels_temp} degrees. "
+
+
+def coordinates(city):
+    """returns the coordinates for the city a user inputs"""
+    weather_response = weather_api(city)
 
     # empty list to store longitude, latitude in that order
     long_lat = []
+
     # get long and lat from weather api
     for key, val in weather_response.json().items():
-        if key != 'city':
+        if key != 'location':
             continue
         else:
             for k, v in val.items():
-                if k == 'coord':
-                    for v2 in v.values():
-                        long_lat.append(v2)
+                # get latitude
+                if k == 'lat':
+                    long_lat.append(v)
+                # get longitude
+                elif k == 'lon':
+                    long_lat.append(v)
+                else:
+                    continue
     return long_lat
 
 
+def categories():
+    category_list = ['accommodation', 'activity', 'beach', 'commercial', 'catering', 'entertainment', 'leisure']
+    option = input("if you would like to see a list of categories input m,\n\totherwise input a category: ")
+
+    if type(option) != str:
+        print("invalid input")
+    elif option == 'm':
+        print("here is a list of categories to choose from: ")
+        for i in category_list:
+            print(i, end='\n')
+        choice = input("input your category: ")
+        if choice not in category_list:
+            print("invalid category")
+        else:
+            return choice
+    else:
+        if option not in category_list and option != 'm':
+            print("invalid category")
+
+
 def places_api(city, rad):
+    """accesses the places api and returns response/data"""
+    # convert miles to metres to input into api
     radius = miles_to_metres(rad)
+
+    # get more information
     how_many = int(input("how many places would you like listed? "))
-    category = input("what type of places would you like listed? ")
+    category = categories()
 
-    lon_lat = weather_api(city)
+    # retrieve the coordinates of the user inputted city
+    lon_lat = coordinates(city)
 
-    longitude = lon_lat[0]
-    latitude = lon_lat[1]
+    # storing the longitude and latitude
+    longitude = lon_lat[1]
+    latitude = lon_lat[0]
 
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
@@ -58,41 +134,51 @@ def places_api(city, rad):
 
     places_url = main_url + category_url + coord_url + limit_url + api_key
 
+    # retrieve places api response/data
     places_response = requests.get(places_url, headers=headers)
 
     return places_response
 
 
 def db_print():
+    """add to database and print out the places"""
+    # main inputs
     # receive user input for the city they would like weather for
     city_name = input("input a city to get weather: ").capitalize()
     miles_radius = int(input("how many miles radius? "))
 
+    # using user input, call places_api to retrieve the places
     places_response = places_api(city_name, miles_radius)
 
-    # Storing in database
+    # retrieve the weather for printing
+    current_weather = get_weather(city_name)
+    print(f"The weather in {city_name}: \n\t{current_weather}")
+
+    # storing in database
     engine = db.create_engine('sqlite:///activity_db.db')
     places = places_response.json()["features"]
-        
+
+    # printing
     print('Place Name \t\t\t\t\t Address')
     print('---------- \t\t\t\t\t -------')
+
     for place in places:
         detail = place["properties"]
         try:
             name = detail["name"]
             address = detail["address_line1"] + " " + detail["address_line2"]
-        
+
         except:
             name = detail["street"]
             address = detail["address_line1"] + " " + detail["address_line2"]
 
-        
         print(f'{name} \t\t\t\t\t {address} ')
+
+        # creating dataframes/tables
         place_dict = {'address': address, 'name': name}
         df = pd.DataFrame.from_dict([place_dict])
         df.to_sql('Activity', con=engine, if_exists='append', index=False)
-    # result = engine.execute('SELECT * FROM Activity;').fetchall()
-    # print(pd.DataFrame(result))
 
 
+# call db_print to begin user input and program
 db_print()
