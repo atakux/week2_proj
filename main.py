@@ -91,6 +91,8 @@ def categories():
     else:
         if option not in category_list and option != 'm':
             print("invalid category")
+        else:
+            return option
 
 
 def places_api(city, rad):
