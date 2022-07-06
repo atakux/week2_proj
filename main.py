@@ -133,6 +133,7 @@ def categories():
         print("invalid input")
     elif option == '':
         # display menu since user hit enter
+
         print("here is a list of categories to choose from: ")
         for i in category_list:
             print(i, end='\n')
@@ -257,5 +258,5 @@ def db_print():
     except:
         print("\nan error occurred.\nplease run the program again and be sure your input is correct.")
 
-
 db_print()
+
