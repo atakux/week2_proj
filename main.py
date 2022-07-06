@@ -87,7 +87,7 @@ def get_weather(city):
                 else:
                     continue
 
-<<<<<<< HEAD
+
     #return {"temp" : temp,"sky" : sky, "winds": winds, "feels_temp": feels_temp}
     return f"The temperature in {city} is {temp} degrees F and is {sky}. The wind speeds are at {winds} mph and it " \
            f"feels like {feels_temp} degrees. "
