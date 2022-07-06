@@ -98,8 +98,9 @@ def get_weather(city):
                 else:
                     continue
 
-    return f"The temperature in {city} is {temp} degrees F and the condition is {sky.lower()}. \n\tThe wind speeds " \
-           f"are at {winds} mph and it feels like {feels_temp} degrees. "
+    weather_data = [temp, sky, feels_temp, winds]
+
+    return weather_data
 
 
 def coordinates(city):
@@ -146,6 +147,24 @@ def categories():
             print("invalid category")
         else:
             return option
+
+
+def filter_categories(weather):
+
+    f_categories = []
+
+    # temp = 0, sky = 1
+    if int(weather[0]) > 75 and weather[1].lower() == "sunny":
+        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach', 'catering.ice_cream',
+                        'entertainment.miniature_golf', 'leisure.park']
+    elif int(weather[0]) > 75 and weather[1].lower != "sunny":
+        f_categories = ['commercial.outdoor_and_sport', 'leisure.spa']
+    elif int(weather[0]) < 50:
+        f_categories = ['commercial.shopping_mall', 'commercial.toy_and_game']
+    else:
+        f_categories = ['commercial.shopping_mall']
+
+    print(f"Based on your weather we suggest you the following categories: {''.join(f_categories)}")
 
 
 def places_api(city, rad):
@@ -252,6 +271,8 @@ def db_print():
 
             # result = engine.execute('SELECT * FROM Activity;').fetchall()
             # print(pd.DataFrame(result))
+
+        filter_categories(get_weather(city_name))
 
     # if user inputted invalid city_name display error message
     except:
