@@ -4,6 +4,7 @@ import requests
 import sqlalchemy as db
 import pandas as pd
 from requests.structures import CaseInsensitiveDict
+from pprint import pprint
 
 
 def miles_to_metres(miles):
@@ -12,27 +13,63 @@ def miles_to_metres(miles):
 
 def weather_api(city):
     # get weather api info using the cityName
-    weather_url = 'https://community-open-weather-map.p.rapidapi.com/climate/month'
+    weather_url = 'https://api.weatherapi.com/v1/current.json'
     weather_query = {"q": city}
     weather_headers = {
-        'X-RapidAPI-Key': 'dfa2158044msh6359d946b81ab6ap188d9ejsn419a4d091251',
-        'X-RapidAPI-Host': 'community-open-weather-map.p.rapidapi.com'
+        'key': '0afe61da1abe4a7691b205109220507'
     }
 
     weather_response = requests.get(weather_url, headers=weather_headers,
                                     params=weather_query)
+    return weather_response
+
+
+def get_weather(city):
+    weather_response = weather_api(city)
+
+    temp = ''
+    sky = ''
+    feels_temp = ''
+    winds = ''
+
+    for key, val in weather_response.json().items():
+        if key == 'current':
+            for k, v in val.items():
+                if k == 'temp_f':
+                    temp = v
+                elif k == 'condition':
+                    for kk, vv in v.items():
+                        if kk == 'text':
+                            sky = vv
+                elif k == 'wind_mph':
+                    winds = v
+                elif k == 'feelslike_f':
+                    feels_temp = v
+                else:
+                    continue
+
+    return f"The temperature in {city} is {temp} degrees F and is {sky}. The wind speeds are at {winds} mph and it " \
+           f"feels like {feels_temp} degrees. "
+
+
+def coordinates(city):
+
+    weather_response = weather_api(city)
 
     # empty list to store longitude, latitude in that order
     long_lat = []
     # get long and lat from weather api
     for key, val in weather_response.json().items():
-        if key != 'city':
+        if key != 'location':
             continue
         else:
             for k, v in val.items():
-                if k == 'coord':
-                    for v2 in v.values():
-                        long_lat.append(v2)
+                if k == 'lat':
+                    long_lat.append(v)
+                elif k == 'lon':
+                    long_lat.append(v)
+                else:
+                    continue
     return long_lat
 
 
@@ -41,10 +78,10 @@ def places_api(city, rad):
     how_many = int(input("how many places would you like listed? "))
     category = input("what type of places would you like listed? ")
 
-    lon_lat = weather_api(city)
+    lon_lat = coordinates(city)
 
-    longitude = lon_lat[0]
-    latitude = lon_lat[1]
+    longitude = lon_lat[1]
+    latitude = lon_lat[0]
 
     headers = CaseInsensitiveDict()
     headers["Accept"] = "application/json"
@@ -70,10 +107,13 @@ def db_print():
 
     places_response = places_api(city_name, miles_radius)
 
+    current_weather = get_weather(city_name)
+    print(f"The weather in {city_name}: \n\t{current_weather}")
+
     # Storing in database
     engine = db.create_engine('sqlite:///activity_db.db')
     places = places_response.json()["features"]
-        
+
     print('Place Name \t\t\t\t\t Address')
     print('---------- \t\t\t\t\t -------')
     for place in places:
@@ -81,18 +121,14 @@ def db_print():
         try:
             name = detail["name"]
             address = detail["address_line1"] + " " + detail["address_line2"]
-        
+
         except:
             name = detail["street"]
             address = detail["address_line1"] + " " + detail["address_line2"]
 
-        
         print(f'{name} \t\t\t\t\t {address} ')
         place_dict = {'address': address, 'name': name}
         df = pd.DataFrame.from_dict([place_dict])
         df.to_sql('Activity', con=engine, if_exists='append', index=False)
-    # result = engine.execute('SELECT * FROM Activity;').fetchall()
-    # print(pd.DataFrame(result))
-
 
 db_print()
