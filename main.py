@@ -4,6 +4,18 @@ import requests
 import sqlalchemy as db
 import pandas as pd
 from requests.structures import CaseInsensitiveDict
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
+
+class Activity(Base):
+    __tablename__ = 'Activity'
+    id = db.Column("id",db.Integer(),primary_key = True,autoincrement=True)
+    address = db.Column(db.String(1000))
+    name = db.Column(db.String(255))
+    category = db.Column(db.String(255))
+    city = db.Column(db.String(225))
 
 
 def miles_to_metres(miles):
@@ -209,7 +221,7 @@ def places_api(city, rad, how_many_places):
 
     places_resp = requests.get(places_url, headers=headers)
 
-    return places_resp
+    return {"place_resp" : places_resp, "category" : category}
 
 
 def suggested_places_api(city, rad, how_many_places, *cat):
@@ -240,14 +252,21 @@ def suggested_places_api(city, rad, how_many_places, *cat):
 
     places_resp = requests.get(places_url, headers=headers)
 
-    return places_resp
+    #return places_resp
+    return {"place_resp" : places_resp, "category" : category}
 
 
-def add_to_db(place_resp):
+def add_to_db(place_resp,city):
     """add data to database"""
     # storing in database
-    engine = db.create_engine('sqlite:///activity_db.db')
-    places = place_resp.json()["features"]
+    engine = db.create_engine('sqlite:///activity.db')
+    Session = sessionmaker(bind = engine)
+    session = Session()
+
+    connection = engine.connect()
+
+    category = place_resp["category"]
+    places = place_resp["place_resp"].json()["features"]
 
     for place in places:
         detail = place["properties"]
@@ -258,13 +277,41 @@ def add_to_db(place_resp):
             name = detail["street"]
             address = detail["address_line1"] + " " + detail["address_line2"]
 
-        place_dict = {'address': address, 'name': name}
-        # noinspection PyTypeChecker
-        df = pd.DataFrame.from_dict([place_dict])
-        df.to_sql('Activity', con=engine, if_exists='append', index=False)
+        try:
+            #ins = db.insert("Activity").values(address = "address", name = "name", category = "category")
+            act = Activity(address = address, name = name, category = category,city = city)
+            session.add(act)
+            session.commit()
+        except:
+            meta = db.MetaData()
+            table = db.Table(
+                'Activity', meta,
+                db.Column("id",db.Integer(),primary_key = True,autoincrement=True),
+                db.Column("address", db.String(1000)),
+                db.Column("name", db.String(225)),
+                db.Column("category", db.String(225)),
+                db.Column("city", db.String(225)),
+            )
+            meta.create_all(engine)
+            ins = db.insert(table).values(address = address, name = name, category = category, city = city)
+            result = connection.execute(ins)
 
-        # result = engine.execute('SELECT * FROM Activity;').fetchall()
-        # print(pd.DataFrame(result))
+#querry the database by categories or city
+def research_db(key,res):
+    criteria = Activity.city
+
+    if key == 2:
+        criteria = Activity.category
+    
+    engine = db.create_engine('sqlite:///activity.db')
+    Session = sessionmaker(bind = engine)
+    session = Session()
+    connection = engine.connect()
+    results = session.query(Activity).filter(criteria == res)
+
+    #print the results
+    for result in results:
+        print(result.name)
 
 
 def print_info(places_resp):
@@ -273,7 +320,7 @@ def print_info(places_resp):
     print('Place Name \t\t\t\t\t Address')
     print('---------- \t\t\t\t\t -------')
 
-    places = places_resp.json()["features"]
+    places = places_resp["place_resp"].json()["features"]
 
     for place in places:
         detail = place["properties"]
@@ -327,17 +374,20 @@ if __name__ == "__main__":
         print("invalid input detected. defaulting to 5 places.")
         how_many = 5
 
-    # checking for invalid city_name input
+    
     try:
+
         # call places_api to get places
         places_response = places_api(city_name, miles_radius, how_many)
-        add_to_db(places_response)
-
+        # checking for invalid city_name input
         # check if the city_name was a zip code or blank, rather than a city name
         if city_name == 'auto:ip':
             city_name = get_location_ip()
         elif city_name.isdigit():
             city_name = get_location_zip(city_name)
+
+        add_to_db(places_response,city_name)
+
 
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
@@ -357,3 +407,9 @@ if __name__ == "__main__":
         print_info(suggested_response)
     except:
         print("\nan error occurred.\nplease run the program again and be sure your input is correct.")
+    
+    next = input("Do you want to access your previous research, enter y for yes and n for no: ")
+    if(next == 'y'):
+        criteria = int(input("Enter 1 if you are looking for a particular city, 2 for a category: "))
+        res = input("Enter the name of the city or the category you are looking for: ") 
+        research_db(criteria,res)
