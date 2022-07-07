@@ -297,17 +297,22 @@ def add_to_db(place_resp, yn):
         detail = place["properties"]
         try:
             name = detail["name"]
+            city = detail["city"]
+            state = detail["state"]
             address = detail["address_line1"] + " " + detail["address_line2"]
         except:
             name = detail["street"]
+            city = detail["city"]
+            state = detail["state"]
             address = detail["address_line1"] + " " + detail["address_line2"]
 
-        place_dict = {'address': address, 'name': name}
+        place_dict = {'state': state, 'city': city, 'name': name, 'address': address}
         # noinspection PyTypeChecker
         df = pd.DataFrame.from_dict([place_dict])
         df.to_sql('Activity', con=engine, if_exists='append', index=False)
 
     if yn == 'y':
+        print("Here is your database:\n")
         result = engine.execute('SELECT * FROM Activity;').fetchall()
         print(pd.DataFrame(result))
     else:
@@ -394,7 +399,7 @@ if __name__ == "__main__":
 
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
-        print(f"\nThe weather in {city_name.title()}: \n\tThe temperature in {city_name.title()} is "
+        print(f"The weather in {city_name.title()}: \n\tThe temperature in {city_name.title()} is "
               f"{current_weather[0]} degrees F and the condition is {current_weather[1].lower()}. \n\tThe wind "
               f"speeds are at {current_weather[3]} mph and it feels like {current_weather[2]} degrees.\n")
 
@@ -411,7 +416,7 @@ if __name__ == "__main__":
         suggested_response = suggested_places_api(city_name, miles_radius, how_many, suggested_list)
         print_info(suggested_response)
 
-        opt = input("would you like to view the database ? (y/n): ").lower()
+        opt = input("\nWould you like to view the database ? (y/n): ").lower()
         add_to_db(suggested_response, opt)
     except:
         print("\nAn error occurred.\nPlease run the program again and be sure your input is correct.")
