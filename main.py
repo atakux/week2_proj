@@ -4,7 +4,6 @@ import requests
 import sqlalchemy as db
 import pandas as pd
 from requests.structures import CaseInsensitiveDict
-from pprint import pprint
 
 
 def miles_to_metres(miles):
@@ -66,9 +65,6 @@ def get_weather(city):
 
     weather_response = weather_api(city)
 
-    if city == 'auto:ip':
-        city = get_location_ip()
-
     # empty variables for storage
     temp = ''
     sky = ''
@@ -77,13 +73,7 @@ def get_weather(city):
 
     # parse through weatherapi response data to gather info
     for key, val in weather_response.json().items():
-        if key == 'location':
-            for k, v in val.items():
-                if k != 'name':
-                    continue
-                else:
-                    the_city = v
-        elif key == 'current':
+        if key == 'current':
             for k, v in val.items():
                 if k == 'temp_f':
                     temp = v
@@ -166,22 +156,33 @@ def filter_categories(weather):
     return f_categories
 
 
-def places_api(city, rad):
+def places_api(city, rad, how_many, cat=None):
     """access the placesapi and return response/data"""
     radius = miles_to_metres(rad)
 
-    # prompt user for amount of locations, if invalid use default
-    how_many = int(input("how many places would you like listed? "))
-    # set a maximum number of places
-    if how_many > 20:
-        print("the number of places is limited to 20. \ndefaulting to 20 places.")
-        how_many = 20
-    elif how_many < 1:
-        print("the number of places must be at least 1. \ndefaulting to 1 place")
-        how_many = 1
+    if cat is None:
+        # prompt the user to choose a category
+        category = categories()
+    else:
+        category = cat
 
-    # prompt the user to choose a category
-    category = categories()
+    print("\nwhen prompted for accommodation,\nenter w if you are looking for places suitable for person in wheelchair,"
+          " enter d for places that accept dogs, wd for both conditions. [leave blank if None]")
+    condition = ""
+    while True:
+        condition = input("Accommodation: ")
+        if condition == "w" or condition == "d" or condition == "wd" or condition == "":
+            break
+        else:
+            print("\nInput is incorrect.\nEnter w if you are looking for places suitable for person in wheelchair,"
+                  " enter d for places that accept dogs, wd for both conditions. [leave blank if None]")
+
+    if condition == "w":
+        condition = "wheelchair"
+    elif condition == "d":
+        condition = "dogs"
+    elif condition == "wd":
+        condition = "wheelchair,dogs"
 
     # retrieve user coordinates
     lon_lat = coordinates(city)
@@ -196,22 +197,26 @@ def places_api(city, rad):
     # set up the url based on user input and base links
     main_url = "https://api.geoapify.com/v2/places?"
     category_url = "categories="+category
+    condition_url = "&conditions="+condition
     coord_url = "&filter=circle:"+str(longitude)+","+str(latitude)+","+str(radius)
     limit_url = "&limit="+str(how_many)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
 
-    places_url = main_url + category_url + coord_url + limit_url + api_key
+    if condition == "":
+        places_url = main_url + category_url + coord_url + limit_url + api_key
+    else:
+        places_url = main_url + category_url + condition_url + coord_url + limit_url + api_key
 
     places_resp = requests.get(places_url, headers=headers)
 
     return places_resp
 
 
-def add_to_db(place_response):
+def add_to_db(place_resp):
     """add data to database"""
     # storing in database
     engine = db.create_engine('sqlite:///activity_db.db')
-    places = places_response.json()["features"]
+    places = place_resp.json()["features"]
 
     for place in places:
         detail = place["properties"]
@@ -223,6 +228,7 @@ def add_to_db(place_response):
             address = detail["address_line1"] + " " + detail["address_line2"]
 
         place_dict = {'address': address, 'name': name}
+        # noinspection PyTypeChecker
         df = pd.DataFrame.from_dict([place_dict])
         df.to_sql('Activity', con=engine, if_exists='append', index=False)
 
@@ -230,13 +236,13 @@ def add_to_db(place_response):
         # print(pd.DataFrame(result))
 
 
-def print_info():
+def print_info(places_resp):
     """print all the info in a formatted manner"""
     # printing
     print('Place Name \t\t\t\t\t Address')
     print('---------- \t\t\t\t\t -------')
 
-    places = places_response.json()["features"]
+    places = places_resp.json()["features"]
 
     for place in places:
         detail = place["properties"]
@@ -272,10 +278,20 @@ if __name__ == "__main__":
         print("\nmin radius is 1 mile. \ndefaulting to 1 mile.")
         miles_radius = 1
 
+    # prompt user for amount of locations, if invalid use default
+    how_many = int(input("how many places would you like listed? "))
+    # set a maximum number of places
+    if how_many > 20:
+        print("the number of places is limited to 20. \ndefaulting to 20 places.")
+        how_many = 20
+    elif how_many < 1:
+        print("the number of places must be at least 1. \ndefaulting to 1 place.")
+        how_many = 1
+
     # checking for invalid city_name input
     try:
         # call places_api to get places
-        places_response = places_api(city_name, miles_radius)
+        places_response = places_api(city_name, miles_radius, how_many)
         add_to_db(places_response)
 
         # check if the city_name was a zip code or blank, rather than a city name
@@ -290,7 +306,7 @@ if __name__ == "__main__":
               f"the condition is {current_weather[1].lower()}. \n\tThe wind speeds are at {current_weather[3]} mph "
               f"and it feels like {current_weather[2]} degrees. ")
 
-        print_info()
+        print_info(places_response)
 
         suggested_list = filter_categories(get_weather(city_name))
 
