@@ -1,6 +1,6 @@
 import requests
-import sqlalchemy as db
 import pandas as pd
+import sqlalchemy as db
 from requests.structures import CaseInsensitiveDict
 from itertools import permutations
 
@@ -202,7 +202,7 @@ def categories():
         return "tourism"
     elif option == '':
         # display menu since user hit enter
-        print("\n\there is a list of categories to choose from: ")
+        print("\there is a list of categories to choose from: ")
         for i in category_list:
             print(f"\t  {i}", end='\n')
         choice = input(" > input your category: ").lower()
@@ -237,7 +237,7 @@ def filter_categories(weather):
 
 def get_condition():
     """prompt user for any accommodations they may have"""
-    choice = input("\nWould you like to input any accommodations? (y/n): ").lower()
+    choice = input("Would you like to input any accommodations? (y/n): ").lower()
     condition = []
 
     # list of possible combinations a user might input for accommodations
@@ -279,7 +279,6 @@ def get_condition():
         return condition
 
     elif choice == 'n':
-        print(" no accommodations.\n")
         return condition
 
     else:
@@ -288,10 +287,10 @@ def get_condition():
 
 
 # database function
-def add_to_db(place_resp):
+def add_to_db(place_resp, yn):
     """add data to database"""
     # storing in database
-    engine = db.create_engine('sqlite:///activity_db.db')
+    engine = db.create_engine('sqlite:///activity.db')
     places = place_resp.json()["features"]
 
     for place in places:
@@ -308,8 +307,11 @@ def add_to_db(place_resp):
         df = pd.DataFrame.from_dict([place_dict])
         df.to_sql('Activity', con=engine, if_exists='append', index=False)
 
-        # result = engine.execute('SELECT * FROM Activity;').fetchall()
-        # print(pd.DataFrame(result))
+    if yn == 'y':
+        result = engine.execute('SELECT * FROM Activity;').fetchall()
+        print(pd.DataFrame(result))
+    else:
+        print("")
 
 
 # printing function
@@ -382,13 +384,13 @@ if __name__ == "__main__":
     try:
         # call places_api to get places
         places_response = places_api(city_name, miles_radius, how_many)
-        add_to_db(places_response)
+        add_to_db(places_response, 'n')
 
         # check if the city_name was a zip code or blank, rather than a city name
         if city_name == 'auto:ip':
-            city_name = get_location_ip()
+            city_name = get_location_ip().title()
         elif city_name.isdigit():
-            city_name = get_location_zip(city_name)
+            city_name = get_location_zip(city_name).title()
 
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
@@ -408,5 +410,8 @@ if __name__ == "__main__":
 
         suggested_response = suggested_places_api(city_name, miles_radius, how_many, suggested_list)
         print_info(suggested_response)
+
+        opt = input("would you like to view the database ? (y/n): ").lower()
+        add_to_db(suggested_response, opt)
     except:
         print("\nAn error occurred.\nPlease run the program again and be sure your input is correct.")
