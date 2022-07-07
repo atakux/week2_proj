@@ -512,7 +512,6 @@ if __name__ == "__main__":
             except:
                 print("The option entered is not valid. Please enter a valid option")
                 continue
-
         
         res = input("Enter the name of the city or the category you are looking for: ") 
         try:
