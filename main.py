@@ -371,6 +371,7 @@ def add_to_db(place_resp,city):
             meta.create_all(engine)
             ins = db.insert(table).values(address = address, name = name, category = category, city = city)
             result = connection.execute(ins)
+    connection.close()
 
 #querry the database by categories or city
 def research_db(key,res):
@@ -390,6 +391,8 @@ def research_db(key,res):
     print('    ---------- {:<36} -------'.format(''))
     for result in results:
         print(f'{result.name:<47} {result.address}')
+
+    connection.close()
 
 
 # printing function
@@ -458,20 +461,20 @@ if __name__ == "__main__":
         print("--> invalid input detected.\n\tdefaulting to 5 places.\n")
         how_many = 5
 
+    places_response = places_api(city_name, miles_radius, how_many)
     
-    try:
 
         # call places_api to get places
-        places_response = places_api(city_name, miles_radius, how_many)
         # checking for invalid city_name input
         # check if the city_name was a zip code or blank, rather than a city name
-        if city_name == 'auto:ip':
-            city_name = get_location_ip()
-        elif city_name.isdigit():
-            city_name = get_location_zip(city_name)
+    if city_name == 'auto:ip':
+        city_name = get_location_ip()
+    elif city_name.isdigit():
+        city_name = get_location_zip(city_name)
         
-        add_to_db(places_response,city_name)
+    add_to_db(places_response,city_name)
 
+    try:
 
 
         # display the current weather conditions for the city
