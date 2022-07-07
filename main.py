@@ -386,8 +386,10 @@ def research_db(key,res):
     results = session.query(Activity).filter(criteria == res)
 
     #print the results
+    print('    Place Name {:<36} Address'.format(''))
+    print('    ---------- {:<36} -------'.format(''))
     for result in results:
-        print(result.name)
+        print(f'{result.name:<47} {result.address}')
 
 
 # printing function
@@ -456,19 +458,20 @@ if __name__ == "__main__":
         print("--> invalid input detected.\n\tdefaulting to 5 places.\n")
         how_many = 5
 
-    places_response = places_api(city_name, miles_radius, how_many)
-    add_to_db(places_response,"Denver")
     
     try:
 
         # call places_api to get places
-        
+        places_response = places_api(city_name, miles_radius, how_many)
         # checking for invalid city_name input
         # check if the city_name was a zip code or blank, rather than a city name
         if city_name == 'auto:ip':
             city_name = get_location_ip()
         elif city_name.isdigit():
             city_name = get_location_zip(city_name)
+        
+        add_to_db(places_response,city_name)
+
 
 
         # display the current weather conditions for the city
@@ -489,11 +492,27 @@ if __name__ == "__main__":
 
         suggested_response = suggested_places_api(city_name, miles_radius, how_many, suggested_list)
         print_info(suggested_response)
+        add_to_db(suggested_response,city_name)
     except:
         print("\nan error occurred.\nplease run the program again and be sure your input is correct.")
     
     next = input("Do you want to access your previous research(y/n): ")
     if(next == 'y'):
-        criteria = int(input("Enter 1 if you are looking for a particular city, 2 for a category: "))
+        while True:
+            try:
+                criteria = int(input("Enter 1 if you are looking for a particular city, 2 for a category: "))
+                if(criteria == 1 or criteria == 2):
+                    break
+                else:
+                    print("The option entered is not valid. Please enter a valid option")
+                    continue
+            except:
+                print("The option entered is not valid. Please enter a valid option")
+                continue
+
+        
         res = input("Enter the name of the city or the category you are looking for: ") 
-        research_db(criteria,res)
+        try:
+            research_db(criteria,res)
+        except:
+            print("Your input was incorrect. No result matched.")
