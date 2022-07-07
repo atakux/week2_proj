@@ -129,8 +129,9 @@ def categories():
         for i in category_list:
             print(i, end='\n')
         choice = input("input your category: ")
-        if choice not in category_list:
-            print("invalid category")
+        if choice not in category_list or choice == "":
+            print("invalid input or category detected. defaulting to tourism category")
+            return "tourism"
         else:
             return choice
     else:
@@ -298,25 +299,33 @@ if __name__ == "__main__":
         print(f"your location at the zipcode {city_name} is {get_location_zip(city_name)}")
 
     # prompt user for radius in miles
-    miles_radius = int(input("how many miles radius? "))
+    try:
+        miles_radius = int(input("how many miles radius? "))
 
-    # set max and min radius, default values if invalid
-    if miles_radius > 30:
-        print("\nmax radius is 30 miles. \ndefaulting to 30 miles.")
-        miles_radius = 30
-    elif miles_radius < 1:
-        print("\nmin radius is 1 mile. \ndefaulting to 1 mile.")
-        miles_radius = 1
+        # set max and min radius, default values if invalid
+        if miles_radius > 30:
+            print("\nmax radius is 30 miles. \ndefaulting to 30 miles.")
+            miles_radius = 30
+        elif miles_radius < 1:
+            print("\nmin radius is 1 mile. \ndefaulting to 1 mile.")
+            miles_radius = 1
+    except:
+        print("invalid input detected. defaulting to 10 miles.")
+        miles_radius = 10
 
-    # prompt user for amount of locations, if invalid use default
-    how_many = int(input("how many places would you like listed? "))
-    # set a maximum number of places
-    if how_many > 20:
-        print("the number of places is limited to 20. \ndefaulting to 20 places.")
-        how_many = 20
-    elif how_many < 1:
-        print("the number of places must be at least 1. \ndefaulting to 1 place.")
-        how_many = 1
+    try:
+        # prompt user for amount of locations, if invalid use default
+        how_many = int(input("how many places would you like listed? "))
+        # set a maximum number of places
+        if how_many > 20:
+            print("the number of places is limited to 20. \ndefaulting to 20 places.")
+            how_many = 20
+        elif how_many < 1:
+            print("the number of places must be at least 1. \ndefaulting to 1 place.")
+            how_many = 1
+    except:
+        print("invalid input detected. defaulting to 5 places.")
+        how_many = 5
 
     # checking for invalid city_name input
     try:
