@@ -141,7 +141,7 @@ def categories():
 
 
 def filter_categories(weather):
-
+    """filter categories and return suggested list of categories based on weather"""
     # temp = 0, sky = 1
     if int(weather[0]) > 75 and weather[1].lower() == "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach', 'catering.ice_cream',
@@ -156,27 +156,25 @@ def filter_categories(weather):
     return f_categories
 
 
-def places_api(city, rad, how_many, cat=None):
+def places_api(city, rad, how_many_places):
     """access the placesapi and return response/data"""
     radius = miles_to_metres(rad)
 
-    if cat is None:
-        # prompt the user to choose a category
-        category = categories()
-    else:
-        category = cat
+    # prompt the user to choose a category
+    category = categories()
 
+    # prompting user for conditions to find places that will accommodate them properly, if they choose to do so
     print("\nwhen prompted for accommodation,\nenter w if you are looking for places suitable for person in wheelchair,"
           " enter d for places that accept dogs, wd for both conditions. [leave blank if None]")
-    condition = ""
     while True:
-        condition = input("Accommodation: ")
+        condition = input("accommodation: ").lower()
         if condition == "w" or condition == "d" or condition == "wd" or condition == "":
             break
         else:
             print("\nInput is incorrect.\nEnter w if you are looking for places suitable for person in wheelchair,"
                   " enter d for places that accept dogs, wd for both conditions. [leave blank if None]")
 
+    # checking which condition, if any, was selected
     if condition == "w":
         condition = "wheelchair"
     elif condition == "d":
@@ -199,13 +197,45 @@ def places_api(city, rad, how_many, cat=None):
     category_url = "categories="+category
     condition_url = "&conditions="+condition
     coord_url = "&filter=circle:"+str(longitude)+","+str(latitude)+","+str(radius)
-    limit_url = "&limit="+str(how_many)
+    limit_url = "&limit="+str(how_many_places)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
 
+    # modify url based on condition input
     if condition == "":
         places_url = main_url + category_url + coord_url + limit_url + api_key
     else:
         places_url = main_url + category_url + condition_url + coord_url + limit_url + api_key
+
+    places_resp = requests.get(places_url, headers=headers)
+
+    return places_resp
+
+
+def suggested_places_api(city, rad, how_many_places, *cat):
+    """access the placesapi and return response/data based on suggested categories"""
+    radius = miles_to_metres(rad)
+
+    category = cat
+
+    # retrieve user coordinates
+    lon_lat = coordinates(city)
+
+    # store coordinates in separate variables
+    longitude = lon_lat[1]
+    latitude = lon_lat[0]
+
+    headers = CaseInsensitiveDict()
+    headers["Accept"] = "application/json"
+
+    # set up the url based on user input and base links
+    main_url = "https://api.geoapify.com/v2/places?"
+    for i in category:
+        category_url = "categories=" + ','.join(i)
+    coord_url = "&filter=circle:" + str(longitude) + "," + str(latitude) + "," + str(radius)
+    limit_url = "&limit=" + str(how_many_places)
+    api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
+
+    places_url = main_url + category_url + coord_url + limit_url + api_key
 
     places_resp = requests.get(places_url, headers=headers)
 
@@ -302,15 +332,19 @@ if __name__ == "__main__":
 
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
-        print(f"The weather in {city_name}: \n\tThe temperature in {city_name} is {current_weather[0]} degrees F and "
+        print(f"\nThe weather in {city_name}: \n\tThe temperature in {city_name} is {current_weather[0]} degrees F and "
               f"the condition is {current_weather[1].lower()}. \n\tThe wind speeds are at {current_weather[3]} mph "
               f"and it feels like {current_weather[2]} degrees. ")
 
         print_info(places_response)
 
+        # prepare the suggested activities based on user location weather
         suggested_list = filter_categories(get_weather(city_name))
 
-        print(f"\nBased on your weather we suggest you the following categories: "
-              f"{', '.join(filter_categories(get_weather(city_name)))}")
+        print(f"\nBased on your weather we suggest you the following activities with the category "
+              f"{', '.join(filter_categories(get_weather(city_name)))} : ")
+
+        suggested_response = suggested_places_api(city_name, miles_radius, how_many, suggested_list)
+        print_info(suggested_response)
     except:
         print("\nan error occurred.\nplease run the program again and be sure your input is correct.")
