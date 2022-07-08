@@ -264,8 +264,8 @@ def get_condition():
     combos_list5 = [''.join(i) for i in permutations('12345', 5)]
 
     if choice == 'y':
-        # prompting user for conditions to find places that will accommodate them properly,
-        # if they choose to do so
+        # prompting user for conditions to find places that
+        # will accommodate them properly
         print("When prompted for accommodation,\n\tenter 1 for places with "
               "wheelchair access,\n\tenter 2 for dog-friendly places,\n\t "
               "enter 3 for vegetarian places,\n\tenter 4 for gluten free places, "
