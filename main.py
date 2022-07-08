@@ -43,7 +43,7 @@ def places_api(city, rad, how_many_places):
     main_url = "https://api.geoapify.com/v2/places?"
     category_url = "categories="+category
     condition_url = "&conditions="+','.join(condition)
-    coord_url = "&filter=circle:"+str(longitude)+\
+    coord_url = "&filter=circle:"+str(longitude)+ \
                 ","+str(latitude)+","+str(radius)
     limit_url = "&limit="+str(how_many_places)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
@@ -52,7 +52,8 @@ def places_api(city, rad, how_many_places):
     if not condition:
         places_url = main_url + category_url + coord_url + limit_url + api_key
     else:
-        places_url = main_url + category_url + condition_url + coord_url + limit_url + api_key
+        places_url = main_url + category_url + condition_url + \
+        coord_url + limit_url + api_key
 
     places_resp = requests.get(places_url, headers=headers)
 
