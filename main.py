@@ -203,7 +203,8 @@ def categories():
     """
     category_list = ['accommodation', 'activity', 'beach', 'commercial',
                      'catering', 'entertainment', 'leisure', 'tourism']
-    option = input("Input a category [leave Blank and hit Enter to see options]: ").lower()
+    option = input("Input a category [leave Blank and hit Enter to see "
+                   "options]: ").lower()
 
     # check for invalid input
     if type(option) != str:
@@ -232,7 +233,7 @@ def filter_categories(weather):
     """filter categories and return suggested list of categories based on weather"""
     # temp = 0, sky = 1
     if int(weather[0]) > 75 and weather[1].lower() == "sunny":
-        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach', 
+        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach',
                         'catering.ice_cream', 'entertainment.miniature_golf', 'leisure.park']
     elif int(weather[0]) > 75 and weather[1].lower != "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'leisure.spa']
