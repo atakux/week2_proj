@@ -296,7 +296,8 @@ def get_condition():
             if '5' in option:
                 condition.append("internet_access")
 
-            print(f"...gathering places to accommodate for {', '.join(condition)}...\n")
+            print(f"...gathering places to accommodate for"
+                  f" {', '.join(condition)}...\n")
         return condition
 
     elif choice == 'n':
