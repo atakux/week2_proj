@@ -238,8 +238,8 @@ def filter_categories(weather):
     # temp = 0, sky = 1
     if int(weather[0]) > 75 and weather[1].lower() == "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool',
-                        'beach', 'catering.ice_cream', 'entertainment.miniature_golf',
-                        'leisure.park']
+                        'beach', 'catering.ice_cream',
+                        'entertainment.miniature_golf', 'leisure.park']
     elif int(weather[0]) > 75 and weather[1].lower != "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'leisure.spa']
     elif int(weather[0]) < 50:
