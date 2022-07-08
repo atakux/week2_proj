@@ -231,7 +231,10 @@ def categories():
 
 
 def filter_categories(weather):
-    """filter categories and return suggested list of categories based on weather"""
+    """
+    filter categories and return suggested list of 
+    categories based on weather
+    """
     # temp = 0, sky = 1
     if int(weather[0]) > 75 and weather[1].lower() == "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach',
