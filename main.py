@@ -339,7 +339,7 @@ def print_info(places_resp):
             try:
                 name = detail["name"]
                 address = detail["address_line1"] + " " + detail["address_line2"]
-            except:
+            except Exception:
                 name = detail["street"]
                 address = detail["address_line1"] + " " + detail["address_line2"]
             print(f'    {name:<47} {address}')
@@ -368,7 +368,7 @@ if __name__ == "__main__":
         elif miles_radius < 1:
             print("--> min radius is 1 mile.\n\tdefaulting to 1 mile.\n")
             miles_radius = 1
-    except:
+    except Exception:
         print("--> invalid input detected.\n\tdefaulting to 10 miles.\n")
         miles_radius = 10
 
@@ -382,7 +382,7 @@ if __name__ == "__main__":
         elif how_many < 1:
             print("--> the number of places must be at least 1.\n\tdefaulting to 1 place.\n")
             how_many = 1
-    except:
+    except Exception:
         print("--> invalid input detected.\n\tdefaulting to 5 places.\n")
         how_many = 5
 
@@ -419,5 +419,5 @@ if __name__ == "__main__":
 
         opt = input("\nWould you like to view the database ? (y/n): ").lower()
         add_to_db(suggested_response, opt)
-    except:
+    except Exception:
         print("\nAn error occurred.\nPlease run the program again and be sure your input is correct.")
