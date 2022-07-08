@@ -328,7 +328,6 @@ def add_to_db(place_resp, yn):
             state = detail["state"]
             address = detail["address_line1"] + " " + detail["address_line2"]
 
-<<<<<<< HEAD
         try:
             #ins = db.insert("Activity").values(address = "address", name = "name", category = "category")
             act = Activity(address = address, name = name, category = category,city = city)
@@ -448,7 +447,6 @@ if __name__ == "__main__":
               "to 5 places.\n")
         how_many = 5
 
-<<<<<<< HEAD
     try:
         places_response = places_api(city_name, miles_radius, how_many)
     
@@ -472,7 +470,6 @@ if __name__ == "__main__":
             city_name = get_location_ip().title()
         elif city_name.isdigit():
             city_name = get_location_zip(city_name).title()
->>>>>>> main
 
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
