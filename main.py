@@ -252,7 +252,8 @@ def filter_categories(weather):
 
 def get_condition():
     """prompt user for any accommodations they may have"""
-    choice = input("Would you like to input any accommodations? (y/n): ").lower()
+    choice = input("Would you like to input any accommodations? "
+                   "(y/n): ").lower()
     condition = []
 
     # list of possible combinations a user might input for accommodations
