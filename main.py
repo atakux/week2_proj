@@ -424,7 +424,8 @@ if __name__ == "__main__":
         places_response = places_api(city_name, miles_radius, how_many)
         add_to_db(places_response, 'n')
 
-        # check if the city_name was a zip code or blank, rather than a city name
+        # check if the city_name was a zip code or
+        # blank, rather than a city name
         if city_name == 'auto:ip':
             city_name = get_location_ip().title()
         elif city_name.isdigit():
@@ -432,9 +433,10 @@ if __name__ == "__main__":
 
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
-        print(f"The weather in {city_name.title()}: \n\tThe temperature in {city_name.title()} is "
-              f"{current_weather[0]} degrees F and the condition is {current_weather[1].lower()}. "
-              f"\n\tThe windspeeds are at {current_weather[3]} mph and it feels like "
+        print(f"The weather in {city_name.title()}: \n\tThe temperature in "
+              f"{city_name.title()} is {current_weather[0]} degrees F and "
+              f"the condition is {current_weather[1].lower()}. \n\tThe "
+              f"windspeeds are at {current_weather[3]} mph and it feels like "
               f"{current_weather[2]} degrees.\n")
 
         print("Here is your list of places:\n")
@@ -443,14 +445,17 @@ if __name__ == "__main__":
         # prepare the suggested activities based on user location weather
         suggested_list = filter_categories(get_weather(city_name))
 
-        print(f"\n\nBased on your current weather we suggest you the following activities with "
-              f"the category {', '.join(filter_categories(get_weather(city_name)))}:\n\t[note:  "
-              f"no accommodations are applied in this list]\n")
+        print(f"\n\nBased on your current weather we suggest you the following "
+              f"activities with the category "
+              f"{', '.join(filter_categories(get_weather(city_name)))}:\n\t"
+              f"[note: no accommodations are applied in this list]\n")
 
-        suggested_response = suggested_places_api(city_name, miles_radius, how_many, suggested_list)
+        suggested_response = suggested_places_api(city_name, miles_radius, 
+                                                  how_many, suggested_list)
         print_info(suggested_response)
 
         opt = input("\nWould you like to view the database ? (y/n): ").lower()
         add_to_db(suggested_response, opt)
     except Exception:
-        print("\nAn error occurred.\nPlease run the program again and be sure your input is correct.")
+        print("\nAn error occurred.\nPlease run the program again and be sure "
+              "your input is correct.")
