@@ -5,6 +5,9 @@ class TestFileName(unittest.TestCase):
 
     def setUp(self):
         pass
+
+    def test_places_api(self):
+        self.assertEqual(places_api("Denver",5,3),200)
     def test_test(self):
         self.assertEqual(0,0)
 
