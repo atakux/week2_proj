@@ -232,13 +232,14 @@ def categories():
 
 def filter_categories(weather):
     """
-    filter categories and return suggested list of 
+    filter categories and return suggested list of
     categories based on weather
     """
     # temp = 0, sky = 1
     if int(weather[0]) > 75 and weather[1].lower() == "sunny":
-        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach',
-                        'catering.ice_cream', 'entertainment.miniature_golf', 'leisure.park']
+        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool',
+                        'beach', 'catering.ice_cream', 'entertainment.miniature_golf',
+                        'leisure.park']
     elif int(weather[0]) > 75 and weather[1].lower != "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'leisure.spa']
     elif int(weather[0]) < 50:
@@ -264,16 +265,18 @@ def get_condition():
     if choice == 'y':
         # prompting user for conditions to find places that will accommodate them properly,
         # if they choose to do so
-        print("When prompted for accommodation,\n\tenter 1 for places with wheelchair access,"
-              "\n\tenter 2 for dog-friendly places,\n\tenter 3 for vegetarian places,\n\tenter 4 "
-              "for gluten free places,\n\tenter 5 for places with internet access.\n\tenter a  "
-              "combination of numbers for multiple conditions.")
+        print("When prompted for accommodation,\n\tenter 1 for places with "
+              "wheelchair access,\n\tenter 2 for dog-friendly places,\n\t "
+              "enter 3 for vegetarian places,\n\tenter 4 for gluten free places, "
+              "\n\tenter 5 for places with internet access.\n\tenter a combination"
+              " of numbers for multiple conditions.")
 
         option = input(" > input your accommodation: ")
 
         # checking which condition, if any, was selected
-        if option not in combos_list1 and option not in combos_list5 and option not in combos_list4 \
-                and option not in combos_list3 and option not in combos_list2:
+        if option not in combos_list1 and option not in combos_list5 and option \
+                not in combos_list4 and option not in combos_list3 and \
+                option not in combos_list2:
             print("--> invalid input.\n\tdefaulting to 0 accommodations.\n")
             condition = []
         elif option == '':
