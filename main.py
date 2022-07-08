@@ -276,9 +276,9 @@ def get_condition():
         option = input(" > input your accommodation: ")
 
         # checking which condition, if any, was selected
-        if option not in combos_list1 and option not in combos_list5 and option \
-                not in combos_list4 and option not in combos_list3 and \
-                option not in combos_list2:
+        if option not in combos_list1 and option not in combos_list5 \
+                and option not in combos_list4 and option not in \
+                combos_list3 and option not in combos_list2:
             print("--> invalid input.\n\tdefaulting to 0 accommodations.\n")
             condition = []
         elif option == '':
