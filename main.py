@@ -43,8 +43,8 @@ def places_api(city, rad, how_many_places):
     main_url = "https://api.geoapify.com/v2/places?"
     category_url = "categories="+category
     condition_url = "&conditions="+','.join(condition)
-    coord_url = "&filter=circle:"+str(longitude)+ \
-                ","+str(latitude)+","+str(radius)
+    coord_url = "&filter=circle:" + str(longitude) + \
+                "," + str(latitude) + "," + str(radius)
     limit_url = "&limit="+str(how_many_places)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
 
@@ -53,7 +53,7 @@ def places_api(city, rad, how_many_places):
         places_url = main_url + category_url + coord_url + limit_url + api_key
     else:
         places_url = main_url + category_url + condition_url + \
-        coord_url + limit_url + api_key
+                     coord_url + limit_url + api_key
 
     places_resp = requests.get(places_url, headers=headers)
 
@@ -61,7 +61,10 @@ def places_api(city, rad, how_many_places):
 
 
 def suggested_places_api(city, rad, how_many_places, *cat):
-    """access the placesapi and return response/data based on suggested categories"""
+    """
+    access the placesapi and return 
+    response/data based on suggested categories
+    """
     # noinspection PyGlobalUndefined
     global categories_url
 
@@ -82,7 +85,8 @@ def suggested_places_api(city, rad, how_many_places, *cat):
     main_url = "https://api.geoapify.com/v2/places?"
     for i in category:
         categories_url = "categories=" + ','.join(i)
-    coord_url = "&filter=circle:" + str(longitude) + "," + str(latitude) + "," + str(radius)
+    coord_url = "&filter=circle:" + str(longitude) + "," + \
+                str(latitude) + "," + str(radius)
     limit_url = "&limit=" + str(how_many_places)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
 
@@ -194,8 +198,8 @@ def coordinates(city):
 
 def categories():
     """prompts user for categorical input to send to place api. returns category"""
-    category_list = ['accommodation', 'activity', 'beach', 'commercial', 'catering', 'entertainment', 'leisure',
-                     'tourism']
+    category_list = ['accommodation', 'activity', 'beach', 'commercial', 'catering', 
+                     'entertainment', 'leisure', 'tourism']
     option = input("Input a category [leave Blank and hit Enter to see options]: ").lower()
 
     # check for invalid input
@@ -225,8 +229,8 @@ def filter_categories(weather):
     """filter categories and return suggested list of categories based on weather"""
     # temp = 0, sky = 1
     if int(weather[0]) > 75 and weather[1].lower() == "sunny":
-        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach', 'catering.ice_cream',
-                        'entertainment.miniature_golf', 'leisure.park']
+        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach', 
+                        'catering.ice_cream', 'entertainment.miniature_golf', 'leisure.park']
     elif int(weather[0]) > 75 and weather[1].lower != "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'leisure.spa']
     elif int(weather[0]) < 50:
@@ -250,7 +254,8 @@ def get_condition():
     combos_list5 = [''.join(i) for i in permutations('12345', 5)]
 
     if choice == 'y':
-        # prompting user for conditions to find places that will accommodate them properly, if they choose to do so
+        # prompting user for conditions to find places that will accommodate them properly, 
+        # if they choose to do so
         print("When prompted for accommodation,\n\tenter 1 for places with wheelchair access,"
               "\n\tenter 2 for dog-friendly places,\n\tenter 3 for vegetarian places,\n\tenter 4 for gluten free "
               "places,\n\tenter 5 for places with internet access.\n\tenter a combination of numbers for multiple "
