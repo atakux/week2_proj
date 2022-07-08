@@ -326,7 +326,7 @@ def print_info(places_resp):
     places = places_resp.json()["features"]
 
     if not places:
-        print("\n    Unfortunately, there are no places that match your criteria...\n\t:(")
+        print("\n    Unfortunately, there are no places that match your criteria :(")
         print("\n    Try running the program again and input different criteria!")
     else:
         # printing
