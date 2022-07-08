@@ -445,12 +445,12 @@ if __name__ == "__main__":
         # prepare the suggested activities based on user location weather
         suggested_list = filter_categories(get_weather(city_name))
 
-        print(f"\n\nBased on your current weather we suggest you the following "
-              f"activities with the category "
+        print(f"\n\nBased on your current weather we suggest "
+              f"you the following activities with the category "
               f"{', '.join(filter_categories(get_weather(city_name)))}:\n\t"
               f"[note: no accommodations are applied in this list]\n")
 
-        suggested_response = suggested_places_api(city_name, miles_radius, 
+        suggested_response = suggested_places_api(city_name, miles_radius,
                                                   how_many, suggested_list)
         print_info(suggested_response)
 
