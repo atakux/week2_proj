@@ -328,38 +328,11 @@ def add_to_db(place_resp, yn):
             state = detail["state"]
             address = detail["address_line1"] + " " + detail["address_line2"]
 
-        try:
-            #ins = db.insert("Activity").values(address = "address", name = "name", category = "category")
-            act = Activity(address = address, name = name, category = category,city = city)
-            session.add(act)
-            session.commit()
-        except:
-            meta = db.MetaData()
-            table = db.Table(
-                'Activity', meta,
-                db.Column("id",db.Integer(),primary_key = True,autoincrement=True),
-                db.Column("address", db.String(1000)),
-                db.Column("name", db.String(225)),
-                db.Column("category", db.String(225)),
-                db.Column("city", db.String(225)),
-            )
-            meta.create_all(engine)
-            ins = db.insert(table).values(address = address, name = name, category = category, city = city)
-            result = connection.execute(ins)
-    connection.close()
-
-#querry the database by categories or city
-def research_db(key,res):
-    criteria = Activity.city
-
-    if key == 2:
-        criteria = Activity.category
-    
-    engine = db.create_engine('sqlite:///activity.db')
-    Session = sessionmaker(bind = engine)
-    session = Session()
-    connection = engine.connect()
-    results = session.query(Activity).filter(criteria == res)
+        place_dict = {'state': state, 'city': city,
+                      'name': name, 'address': address}
+        # noinspection PyTypeChecker
+        df = pd.DataFrame.from_dict([place_dict])
+        df.to_sql('Activity', con=engine, if_exists='append', index=False)
 
     if yn == 'y':
         print("Here is your database:\n")
@@ -367,8 +340,6 @@ def research_db(key,res):
         print(pd.DataFrame(result))
     else:
         print("")
-
-    connection.close()
 
 
 # printing function
@@ -447,19 +418,8 @@ if __name__ == "__main__":
               "to 5 places.\n")
         how_many = 5
 
+    # checking for invalid city_name input
     try:
-        places_response = places_api(city_name, miles_radius, how_many)
-    
-
-        # call places_api to get places
-        # checking for invalid city_name input
-        # check if the city_name was a zip code or blank, rather than a city name
-        if city_name == 'auto:ip':
-            city_name = get_location_ip()
-        elif city_name.isdigit():
-            city_name = get_location_zip(city_name)
-        
-        add_to_db(places_response,city_name)
         # call places_api to get places
         places_response = places_api(city_name, miles_radius, how_many)
         add_to_db(places_response, 'n')
@@ -493,5 +453,9 @@ if __name__ == "__main__":
         suggested_response = suggested_places_api(city_name, miles_radius,
                                                   how_many, suggested_list)
         print_info(suggested_response)
-    except:
-        print("\nan error occurred.\nplease run the program again and be sure your input is correct.")
+
+        opt = input("\nWould you like to view the database ? (y/n): ").lower()
+        add_to_db(suggested_response, opt)
+    except Exception:
+        print("\nAn error occurred.\nPlease run the program again and be sure "
+              "your input is correct.")
