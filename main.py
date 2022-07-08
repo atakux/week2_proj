@@ -328,7 +328,8 @@ def add_to_db(place_resp, yn):
             state = detail["state"]
             address = detail["address_line1"] + " " + detail["address_line2"]
 
-        place_dict = {'state': state, 'city': city, 'name': name, 'address': address}
+        place_dict = {'state': state, 'city': city,
+                      'name': name, 'address': address}
         # noinspection PyTypeChecker
         df = pd.DataFrame.from_dict([place_dict])
         df.to_sql('Activity', con=engine, if_exists='append', index=False)
@@ -348,8 +349,10 @@ def print_info(places_resp):
     places = places_resp.json()["features"]
 
     if not places:
-        print("\n    Unfortunately, there are no places that match your criteria :(")
-        print("\n    Try running the program again and input different criteria!")
+        print("\n    Unfortunately, there are no places that match "
+              "your criteria :(")
+        print("\n    Try running the program again and input "
+              "different criteria!")
     else:
         # printing
         print('    Place Name {:<36} Address'.format(''))
