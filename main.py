@@ -268,9 +268,10 @@ def get_condition():
         # will accommodate them properly
         print("When prompted for accommodation,\n\tenter 1 for places with "
               "wheelchair access,\n\tenter 2 for dog-friendly places,\n\t "
-              "enter 3 for vegetarian places,\n\tenter 4 for gluten free places, "
-              "\n\tenter 5 for places with internet access.\n\tenter a combination"
-              " of numbers for multiple conditions.")
+              "enter 3 for vegetarian places,\n\tenter 4 for gluten "
+              "free places,\n\tenter 5 for places with internet "
+              "access.\n\tenter a combination of numbers for multiple "
+              "conditions.")
 
         option = input(" > input your accommodation: ")
 
@@ -281,7 +282,8 @@ def get_condition():
             print("--> invalid input.\n\tdefaulting to 0 accommodations.\n")
             condition = []
         elif option == '':
-            print("--> no accommodations selected.\n\tdefaulting to 0 accommodations.\n")
+            print("--> no accommodations selected.\n\tdefaulting to 0"
+                  " accommodations.\n")
         else:
             if '1' in option:
                 condition.append("wheelchair")
