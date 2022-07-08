@@ -4,7 +4,7 @@ from main.py import get_place_api,research_db,suggested_places_api,filter_catego
 class TestFileName(unittest.TestCase):
 
     def setUp(self):
-        
+        pass
     def test_test(self):
         self.assertEqual(0,0)
 
