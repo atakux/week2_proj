@@ -217,7 +217,8 @@ def categories():
             print(f"\t  {i}", end='\n')
         choice = input(" > input your category: ").lower()
         if choice not in category_list or choice == "":
-            print("--> invalid input or category detected.\n\tdefaulting to tourism category.\n")
+            print("--> invalid input or category detected.\n\tdefaulting to "
+                  "tourism category.\n")
             return "tourism"
         else:
             return choice
@@ -258,18 +259,18 @@ def get_condition():
     combos_list5 = [''.join(i) for i in permutations('12345', 5)]
 
     if choice == 'y':
-        # prompting user for conditions to find places that will accommodate them properly, 
+        # prompting user for conditions to find places that will accommodate them properly,
         # if they choose to do so
         print("When prompted for accommodation,\n\tenter 1 for places with wheelchair access,"
-              "\n\tenter 2 for dog-friendly places,\n\tenter 3 for vegetarian places,\n\tenter 4 for gluten free "
-              "places,\n\tenter 5 for places with internet access.\n\tenter a combination of numbers for multiple "
-              "conditions.")
+              "\n\tenter 2 for dog-friendly places,\n\tenter 3 for vegetarian places,\n\tenter 4 "
+              "for gluten free places,\n\tenter 5 for places with internet access.\n\tenter a  "
+              "combination of numbers for multiple conditions.")
 
         option = input(" > input your accommodation: ")
 
         # checking which condition, if any, was selected
-        if option not in combos_list1 and option not in combos_list5 and option not in combos_list4 and option not in \
-                combos_list3 and option not in combos_list2:
+        if option not in combos_list1 and option not in combos_list5 and option not in combos_list4 \
+                and option not in combos_list3 and option not in combos_list2:
             print("--> invalid input.\n\tdefaulting to 0 accommodations.\n")
             condition = []
         elif option == '':
@@ -358,14 +359,15 @@ def print_info(places_resp):
 # driver code
 if __name__ == "__main__":
     # receive user input for the city they would like weather for
-    city_name = input("Input a city or zipcode to get weather.\n\t[leave blank if you want your IP to be inputted "
-                      "for you]: ")
+    city_name = input("Input a city or zipcode to get weather.\n\t[leave blank if you want "
+                      "your IP to be inputted for you]: ")
     # check if the user wants to use their ip or zipcode instead of city name
     if city_name == '':
         print(f"...retrieving your IP...\n\tyour location = {get_location_ip().title()}\n")
         city_name = 'auto:ip'
     elif city_name.isdigit():
-        print(f"Your location at the zipcode {city_name} is {get_location_zip(city_name).title()}\n")
+        print(f"Your location at the zipcode {city_name} is "
+              "{get_location_zip(city_name).title()}\n")
 
     # prompt user for radius in miles
     try:
@@ -411,8 +413,9 @@ if __name__ == "__main__":
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
         print(f"The weather in {city_name.title()}: \n\tThe temperature in {city_name.title()} is "
-              f"{current_weather[0]} degrees F and the condition is {current_weather[1].lower()}. \n\tThe wind "
-              f"speeds are at {current_weather[3]} mph and it feels like {current_weather[2]} degrees.\n")
+              f"{current_weather[0]} degrees F and the condition is {current_weather[1].lower()}. "
+              f"\n\tThe windspeeds are at {current_weather[3]} mph and it feels like "
+              f"{current_weather[2]} degrees.\n")
 
         print("Here is your list of places:\n")
         print_info(places_response)
@@ -420,9 +423,9 @@ if __name__ == "__main__":
         # prepare the suggested activities based on user location weather
         suggested_list = filter_categories(get_weather(city_name))
 
-        print(f"\n\nBased on your current weather we suggest you the following activities with the category "
-              f"{', '.join(filter_categories(get_weather(city_name)))}:\n\t[note: no accommodations are applied in "
-              f"this list]\n")
+        print(f"\n\nBased on your current weather we suggest you the following activities with "
+              f"the category {', '.join(filter_categories(get_weather(city_name)))}:\n\t[note:  "
+              f"no accommodations are applied in this list]\n")
 
         suggested_response = suggested_places_api(city_name, miles_radius, how_many, suggested_list)
         print_info(suggested_response)
