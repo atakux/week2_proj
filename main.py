@@ -362,21 +362,25 @@ def print_info(places_resp):
             detail = place["properties"]
             try:
                 name = detail["name"]
-                address = detail["address_line1"] + " " + detail["address_line2"]
+                address = detail["address_line1"] + \
+                    " " + detail["address_line2"]
             except Exception:
                 name = detail["street"]
-                address = detail["address_line1"] + " " + detail["address_line2"]
+                address = detail["address_line1"] + \
+                    " " + detail["address_line2"]
             print(f'    {name:<47} {address}')
 
 
 # driver code
 if __name__ == "__main__":
     # receive user input for the city they would like weather for
-    city_name = input("Input a city or zipcode to get weather.\n\t[leave blank if you want "
-                      "your IP to be inputted for you]: ")
+    city_name = input("Input a city or zipcode to get weather.\n\t"
+                      "[leave blank if you want your IP to "
+                      "be inputted for you]: ")
     # check if the user wants to use their ip or zipcode instead of city name
     if city_name == '':
-        print(f"...retrieving your IP...\n\tyour location = {get_location_ip().title()}\n")
+        print(f"...retrieving your IP...\n\tyour location ="
+              f" {get_location_ip().title()}\n")
         city_name = 'auto:ip'
     elif city_name.isdigit():
         print(f"Your location at the zipcode {city_name} is "
