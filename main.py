@@ -406,13 +406,16 @@ if __name__ == "__main__":
         how_many = int(input("how many places would you like listed? "))
         # set a maximum number of places
         if how_many > 20:
-            print("--> the number of places is limited to 20.\n\tdefaulting to 20 places.\n")
+            print("--> the number of places is limited to "
+                  "20.\n\tdefaulting to 20 places.\n")
             how_many = 20
         elif how_many < 1:
-            print("--> the number of places must be at least 1.\n\tdefaulting to 1 place.\n")
+            print("--> the number of places must be at "
+                  "least 1.\n\tdefaulting to 1 place.\n")
             how_many = 1
     except Exception:
-        print("--> invalid input detected.\n\tdefaulting to 5 places.\n")
+        print("--> invalid input detected.\n\tdefaulting "
+              "to 5 places.\n")
         how_many = 5
 
     # checking for invalid city_name input
