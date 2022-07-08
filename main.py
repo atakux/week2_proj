@@ -43,7 +43,8 @@ def places_api(city, rad, how_many_places):
     main_url = "https://api.geoapify.com/v2/places?"
     category_url = "categories="+category
     condition_url = "&conditions="+','.join(condition)
-    coord_url = "&filter=circle:"+str(longitude)+","+str(latitude)+","+str(radius)
+    coord_url = "&filter=circle:"+str(longitude)+\
+                ","+str(latitude)+","+str(radius)
     limit_url = "&limit="+str(how_many_places)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
 
@@ -300,7 +301,7 @@ def add_to_db(place_resp, yn):
             city = detail["city"]
             state = detail["state"]
             address = detail["address_line1"] + " " + detail["address_line2"]
-        except:
+        except Exception:
             name = detail["street"]
             city = detail["city"]
             state = detail["state"]
