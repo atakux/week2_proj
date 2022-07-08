@@ -201,8 +201,8 @@ def categories():
     prompts user for categorical input to
     send to place api. returns category
     """
-    category_list = ['accommodation', 'activity', 'beach', 'commercial', 'catering', 
-                     'entertainment', 'leisure', 'tourism']
+    category_list = ['accommodation', 'activity', 'beach', 'commercial',
+                     'catering', 'entertainment', 'leisure', 'tourism']
     option = input("Input a category [leave Blank and hit Enter to see options]: ").lower()
 
     # check for invalid input
