@@ -1,21 +1,8 @@
 import requests
-import sqlalchemy as db
 import pandas as pd
+import sqlalchemy as db
 from requests.structures import CaseInsensitiveDict
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 from itertools import permutations
-
-
-Base = declarative_base()
-
-class Activity(Base):
-    __tablename__ = 'Activity'
-    id = db.Column("id",db.Integer(),primary_key = True,autoincrement=True)
-    address = db.Column(db.String(1000))
-    name = db.Column(db.String(255))
-    category = db.Column(db.String(255))
-    city = db.Column(db.String(225))
 
 
 # weather API
@@ -56,7 +43,8 @@ def places_api(city, rad, how_many_places):
     main_url = "https://api.geoapify.com/v2/places?"
     category_url = "categories="+category
     condition_url = "&conditions="+','.join(condition)
-    coord_url = "&filter=circle:"+str(longitude)+","+str(latitude)+","+str(radius)
+    coord_url = "&filter=circle:" + str(longitude) + \
+                "," + str(latitude) + "," + str(radius)
     limit_url = "&limit="+str(how_many_places)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
 
@@ -64,15 +52,19 @@ def places_api(city, rad, how_many_places):
     if not condition:
         places_url = main_url + category_url + coord_url + limit_url + api_key
     else:
-        places_url = main_url + category_url + condition_url + coord_url + limit_url + api_key
+        places_url = main_url + category_url + condition_url + \
+                     coord_url + limit_url + api_key
 
     places_resp = requests.get(places_url, headers=headers)
 
-    return {"place_resp":places_resp,"category":category}
+    return places_resp
 
 
 def suggested_places_api(city, rad, how_many_places, *cat):
-    """access the placesapi and return response/data based on suggested categories"""
+    """
+    access the placesapi and return
+    response/data based on suggested categories
+    """
     # noinspection PyGlobalUndefined
     global categories_url
 
@@ -93,7 +85,8 @@ def suggested_places_api(city, rad, how_many_places, *cat):
     main_url = "https://api.geoapify.com/v2/places?"
     for i in category:
         categories_url = "categories=" + ','.join(i)
-    coord_url = "&filter=circle:" + str(longitude) + "," + str(latitude) + "," + str(radius)
+    coord_url = "&filter=circle:" + str(longitude) + "," + \
+                str(latitude) + "," + str(radius)
     limit_url = "&limit=" + str(how_many_places)
     api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
 
@@ -204,10 +197,14 @@ def coordinates(city):
 
 
 def categories():
-    """prompts user for categorical input to send to place api. returns category"""
-    category_list = ['accommodation', 'activity', 'beach', 'commercial', 'catering', 'entertainment', 'leisure',
-                     'tourism']
-    option = input("Input a category [leave Blank and hit Enter to see options]: ").lower()
+    """
+    prompts user for categorical input to
+    send to place api. returns category
+    """
+    category_list = ['accommodation', 'activity', 'beach', 'commercial',
+                     'catering', 'entertainment', 'leisure', 'tourism']
+    option = input("Input a category [leave Blank and hit Enter to see "
+                   "options]: ").lower()
 
     # check for invalid input
     if type(option) != str:
@@ -215,12 +212,13 @@ def categories():
         return "tourism"
     elif option == '':
         # display menu since user hit enter
-        print("\n\there is a list of categories to choose from: ")
+        print("\there is a list of categories to choose from: ")
         for i in category_list:
             print(f"\t  {i}", end='\n')
         choice = input(" > input your category: ").lower()
         if choice not in category_list or choice == "":
-            print("--> invalid input or category detected.\n\tdefaulting to tourism category.\n")
+            print("--> invalid input or category detected.\n\tdefaulting to "
+                  "tourism category.\n")
             return "tourism"
         else:
             return choice
@@ -233,10 +231,14 @@ def categories():
 
 
 def filter_categories(weather):
-    """filter categories and return suggested list of categories based on weather"""
+    """
+    filter categories and return suggested list of
+    categories based on weather
+    """
     # temp = 0, sky = 1
     if int(weather[0]) > 75 and weather[1].lower() == "sunny":
-        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool', 'beach', 'catering.ice_cream',
+        f_categories = ['commercial.outdoor_and_sport', 'sport.swimming_pool',
+                        'beach', 'catering.ice_cream',
                         'entertainment.miniature_golf', 'leisure.park']
     elif int(weather[0]) > 75 and weather[1].lower != "sunny":
         f_categories = ['commercial.outdoor_and_sport', 'leisure.spa']
@@ -250,7 +252,8 @@ def filter_categories(weather):
 
 def get_condition():
     """prompt user for any accommodations they may have"""
-    choice = input("\nWould you like to input any accommodations? (y/n): ").lower()
+    choice = input("Would you like to input any accommodations? "
+                   "(y/n): ").lower()
     condition = []
 
     # list of possible combinations a user might input for accommodations
@@ -261,21 +264,26 @@ def get_condition():
     combos_list5 = [''.join(i) for i in permutations('12345', 5)]
 
     if choice == 'y':
-        # prompting user for conditions to find places that will accommodate them properly, if they choose to do so
-        print("When prompted for accommodation,\n\tenter 1 for places with wheelchair access,"
-              "\n\tenter 2 for dog-friendly places,\n\tenter 3 for vegetarian places,\n\tenter 4 for gluten free "
-              "places,\n\tenter 5 for places with internet access.\n\tenter a combination of numbers for multiple "
+        # prompting user for conditions to find places that
+        # will accommodate them properly
+        print("When prompted for accommodation,\n\tenter 1 for places with "
+              "wheelchair access,\n\tenter 2 for dog-friendly places,\n\t "
+              "enter 3 for vegetarian places,\n\tenter 4 for gluten "
+              "free places,\n\tenter 5 for places with internet "
+              "access.\n\tenter a combination of numbers for multiple "
               "conditions.")
 
         option = input(" > input your accommodation: ")
 
         # checking which condition, if any, was selected
-        if option not in combos_list1 and option not in combos_list5 and option not in combos_list4 and option not in \
+        if option not in combos_list1 and option not in combos_list5 \
+                and option not in combos_list4 and option not in \
                 combos_list3 and option not in combos_list2:
             print("--> invalid input.\n\tdefaulting to 0 accommodations.\n")
             condition = []
         elif option == '':
-            print("--> no accommodations selected.\n\tdefaulting to 0 accommodations.\n")
+            print("--> no accommodations selected.\n\tdefaulting to 0"
+                  " accommodations.\n")
         else:
             if '1' in option:
                 condition.append("wheelchair")
@@ -288,11 +296,11 @@ def get_condition():
             if '5' in option:
                 condition.append("internet_access")
 
-            print(f"...gathering places to accommodate for {', '.join(condition)}...\n")
+            print(f"...gathering places to accommodate for"
+                  f" {', '.join(condition)}...\n")
         return condition
 
     elif choice == 'n':
-        print(" no accommodations.\n")
         return condition
 
     else:
@@ -300,59 +308,27 @@ def get_condition():
         return condition
 
 
-
-def suggested_places_api(city, rad, how_many_places, *cat):
-    """access the placesapi and return response/data based on suggested categories"""
-    radius = miles_to_metres(rad)
-
-    category = cat
-
-    # retrieve user coordinates
-    lon_lat = coordinates(city)
-
-    # store coordinates in separate variables
-    longitude = lon_lat[1]
-    latitude = lon_lat[0]
-
-    headers = CaseInsensitiveDict()
-    headers["Accept"] = "application/json"
-
-    # set up the url based on user input and base links
-    main_url = "https://api.geoapify.com/v2/places?"
-    for i in category:
-        category_url = "categories=" + ','.join(i)
-    coord_url = "&filter=circle:" + str(longitude) + "," + str(latitude) + "," + str(radius)
-    limit_url = "&limit=" + str(how_many_places)
-    api_key = "&apiKey=f9d148d7161c4dd591412df7d0bd9801"
-
-    places_url = main_url + category_url + coord_url + limit_url + api_key
-
-    places_resp = requests.get(places_url, headers=headers)
-
-    #return places_resp
-    return {"place_resp" : places_resp, "category" : category}
-
-def add_to_db(place_resp,city):
+# database function
+def add_to_db(place_resp, yn):
     """add data to database"""
     # storing in database
     engine = db.create_engine('sqlite:///activity.db')
-    Session = sessionmaker(bind = engine)
-    session = Session()
-
-    connection = engine.connect()
-
-    category = place_resp["category"]
-    places = place_resp["place_resp"].json()["features"]
+    places = place_resp.json()["features"]
 
     for place in places:
         detail = place["properties"]
         try:
             name = detail["name"]
+            city = detail["city"]
+            state = detail["state"]
             address = detail["address_line1"] + " " + detail["address_line2"]
-        except:
+        except Exception:
             name = detail["street"]
+            city = detail["city"]
+            state = detail["state"]
             address = detail["address_line1"] + " " + detail["address_line2"]
 
+<<<<<<< HEAD
         try:
             #ins = db.insert("Activity").values(address = "address", name = "name", category = "category")
             act = Activity(address = address, name = name, category = category,city = city)
@@ -386,11 +362,12 @@ def research_db(key,res):
     connection = engine.connect()
     results = session.query(Activity).filter(criteria == res)
 
-    #print the results
-    print('    Place Name {:<36} Address'.format(''))
-    print('    ---------- {:<36} -------'.format(''))
-    for result in results:
-        print(f'{result.name:<47} {result.address}')
+    if yn == 'y':
+        print("Here is your database:\n")
+        result = engine.execute('SELECT * FROM Activity;').fetchall()
+        print(pd.DataFrame(result))
+    else:
+        print("")
 
     connection.close()
 
@@ -399,11 +376,13 @@ def research_db(key,res):
 def print_info(places_resp):
     """print all the info in a formatted manner"""
 
-    places = places_resp["place_resp"].json()["features"]
+    places = places_resp.json()["features"]
 
     if not places:
-        print("\n    Unfortunately, there are no places that match your criteria...\n\t:(")
-        print("\n    Try running the program again and input different criteria!")
+        print("\n    Unfortunately, there are no places that match "
+              "your criteria :(")
+        print("\n    Try running the program again and input "
+              "different criteria!")
     else:
         # printing
         print('    Place Name {:<36} Address'.format(''))
@@ -413,24 +392,29 @@ def print_info(places_resp):
             detail = place["properties"]
             try:
                 name = detail["name"]
-                address = detail["address_line1"] + " " + detail["address_line2"]
-            except:
+                address = detail["address_line1"] + \
+                    " " + detail["address_line2"]
+            except Exception:
                 name = detail["street"]
-                address = detail["address_line1"] + " " + detail["address_line2"]
+                address = detail["address_line1"] + \
+                    " " + detail["address_line2"]
             print(f'    {name:<47} {address}')
 
 
 # driver code
 if __name__ == "__main__":
     # receive user input for the city they would like weather for
-    city_name = input("Input a city or zipcode to get weather.\n\t[leave blank if you want your IP to be inputted "
-                      "for you]: ")
+    city_name = input("Input a city or zipcode to get weather.\n\t"
+                      "[leave blank if you want your IP to "
+                      "be inputted for you]: ")
     # check if the user wants to use their ip or zipcode instead of city name
     if city_name == '':
-        print(f"...retrieving your IP...\n\tyour location = {get_location_ip().title()}\n")
+        print(f"...retrieving your IP...\n\tyour location ="
+              f" {get_location_ip().title()}\n")
         city_name = 'auto:ip'
     elif city_name.isdigit():
-        print(f"Your location at the zipcode {city_name} is {get_location_zip(city_name).title()}\n")
+        print(f"Your location at the zipcode {city_name} is "
+              "{get_location_zip(city_name).title()}\n")
 
     # prompt user for radius in miles
     try:
@@ -443,7 +427,7 @@ if __name__ == "__main__":
         elif miles_radius < 1:
             print("--> min radius is 1 mile.\n\tdefaulting to 1 mile.\n")
             miles_radius = 1
-    except:
+    except Exception:
         print("--> invalid input detected.\n\tdefaulting to 10 miles.\n")
         miles_radius = 10
 
@@ -452,36 +436,51 @@ if __name__ == "__main__":
         how_many = int(input("how many places would you like listed? "))
         # set a maximum number of places
         if how_many > 20:
-            print("--> the number of places is limited to 20.\n\tdefaulting to 20 places.\n")
+            print("--> the number of places is limited to "
+                  "20.\n\tdefaulting to 20 places.\n")
             how_many = 20
         elif how_many < 1:
-            print("--> the number of places must be at least 1.\n\tdefaulting to 1 place.\n")
+            print("--> the number of places must be at "
+                  "least 1.\n\tdefaulting to 1 place.\n")
             how_many = 1
-    except:
-        print("--> invalid input detected.\n\tdefaulting to 5 places.\n")
+    except Exception:
+        print("--> invalid input detected.\n\tdefaulting "
+              "to 5 places.\n")
         how_many = 5
 
-    places_response = places_api(city_name, miles_radius, how_many)
+<<<<<<< HEAD
+    try:
+        places_response = places_api(city_name, miles_radius, how_many)
     
 
         # call places_api to get places
         # checking for invalid city_name input
         # check if the city_name was a zip code or blank, rather than a city name
-    if city_name == 'auto:ip':
-        city_name = get_location_ip()
-    elif city_name.isdigit():
-        city_name = get_location_zip(city_name)
+        if city_name == 'auto:ip':
+            city_name = get_location_ip()
+        elif city_name.isdigit():
+            city_name = get_location_zip(city_name)
         
-    add_to_db(places_response,city_name)
+        add_to_db(places_response,city_name)
+        # call places_api to get places
+        places_response = places_api(city_name, miles_radius, how_many)
+        add_to_db(places_response, 'n')
 
-    try:
-
+        # check if the city_name was a zip code or
+        # blank, rather than a city name
+        if city_name == 'auto:ip':
+            city_name = get_location_ip().title()
+        elif city_name.isdigit():
+            city_name = get_location_zip(city_name).title()
+>>>>>>> main
 
         # display the current weather conditions for the city
         current_weather = get_weather(city_name)
-        print(f"\nThe weather in {city_name.title()}: \n\tThe temperature in {city_name.title()} is "
-              f"{current_weather[0]} degrees F and the condition is {current_weather[1].lower()}. \n\tThe wind "
-              f"speeds are at {current_weather[3]} mph and it feels like {current_weather[2]} degrees.\n")
+        print(f"The weather in {city_name.title()}: \n\tThe temperature in "
+              f"{city_name.title()} is {current_weather[0]} degrees F and "
+              f"the condition is {current_weather[1].lower()}. \n\tThe "
+              f"windspeeds are at {current_weather[3]} mph and it feels like "
+              f"{current_weather[2]} degrees.\n")
 
         print("Here is your list of places:\n")
         print_info(places_response)
@@ -489,32 +488,13 @@ if __name__ == "__main__":
         # prepare the suggested activities based on user location weather
         suggested_list = filter_categories(get_weather(city_name))
 
-        print(f"\n\nBased on your current weather we suggest you the following activities with the category "
-              f"{', '.join(filter_categories(get_weather(city_name)))}:\n\t[note: no accommodations are applied in "
-              f"this list]\n")
+        print(f"\n\nBased on your current weather we suggest "
+              f"you the following activities with the category "
+              f"{', '.join(filter_categories(get_weather(city_name)))}:\n\t"
+              f"[note: no accommodations are applied in this list]\n")
 
-        suggested_response = suggested_places_api(city_name, miles_radius, how_many, suggested_list)
+        suggested_response = suggested_places_api(city_name, miles_radius,
+                                                  how_many, suggested_list)
         print_info(suggested_response)
-        add_to_db(suggested_response,city_name)
     except:
         print("\nan error occurred.\nplease run the program again and be sure your input is correct.")
-    
-    next = input("Do you want to access your previous research(y/n): ")
-    if(next == 'y'):
-        while True:
-            try:
-                criteria = int(input("Enter 1 if you are looking for a particular city, 2 for a category: "))
-                if(criteria == 1 or criteria == 2):
-                    break
-                else:
-                    print("The option entered is not valid. Please enter a valid option")
-                    continue
-            except:
-                print("The option entered is not valid. Please enter a valid option")
-                continue
-        
-        res = input("Enter the name of the city or the category you are looking for: ") 
-        try:
-            research_db(criteria,res)
-        except:
-            print("Your input was incorrect. No result matched.")
